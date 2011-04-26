@@ -195,7 +195,7 @@ map <F8> :emenu Encoding.<TAB>
 " ------------------ Меню вставки разного -------------
 set wildmenu
 set wcm=<Tab>
-menu insert.//*80*          i//*****************************************************************************
+menu insert.//*80*          i//*****************************************************************************<CR>
 menu insert.Helius					i//@@@@@@ Changed by Helius @@@@@@<ESC>
 menu insert.date-time       :r !date +"\%d.\%m.\%Y \%k:\%M"<CR>
 map <F5> :emenu insert.<TAB>
@@ -235,7 +235,6 @@ menu make.make_run					:!make run<CR>
 menu make.make_clean				:silent make clean<CR><CR>:!<CR><CR>
 menu make.make_tags					:!ctags -R <CR><CR>:!<CR><CR>
 map <F7> :emenu make.<TAB>
-map <F9> :silent make! <CR><CR>:!<CR>:cw<CR>
 
 
 
