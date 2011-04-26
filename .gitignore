@@ -1,0 +1,11 @@
+.subversion/
+www
+src
+sound
+apache2
+backup.log
+morning_play_list.log
+.tmp
+.sudo_as_admin_successful
+.festival_history
+.bash_history
