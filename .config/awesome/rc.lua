@@ -133,7 +133,7 @@ mygraph = awful.widget.graph()
 mygraph:set_width(25)
 mygraph:set_background_color('#0e0e0e')
 mygraph:set_color('#FF5656')
-mygraph:set_gradient_colors({ '#FF5656', '#88A175', '#AECF96' })
+mygraph:set_gradient_colors({ '#FF5656', '#666666', '#444444' })
 mygraph:set_max_value (100)
 mygraph:set_gradient_angle (0)
 
