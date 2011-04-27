@@ -127,10 +127,15 @@ function log_viewer_turn ()
 		log_viewer_show = "yes"
 	end
 end
-
 -------------------- helius: end ---------------------------
 
-
+mygraph = awful.widget.graph()
+mygraph:set_width(25)
+mygraph:set_background_color('#0e0e0e')
+mygraph:set_color('#FF5656')
+mygraph:set_gradient_colors({ '#FF5656', '#88A175', '#AECF96' })
+mygraph:set_max_value (100)
+mygraph:set_gradient_angle (0)
 
 -- Create a systray
 mysystray = widget({ type = "systray" })
@@ -205,6 +210,7 @@ for s = 1, screen.count() do
         },
         mylayoutbox[s],
         mytextclock,
+				mygraph.widget,
 				db_icon,
 				log_viewer,
         s == 1 and mysystray or nil,
@@ -522,6 +528,40 @@ end
 lv_timer = timer({ timeout = 1 })
 lv_timer:add_signal("timeout", function() lv_timer_hook () end)
 lv_timer:start()
+
+    --------------------- CPU graph ---------------------
+
+--function cpu_timer_hook ()
+--	local f = io.open ("/proc/stat")
+--	local l = f:read ("*a")
+--	f:close ()
+--end
+
+	jiffies = {}
+   function activecpu()
+       local s = ""
+       for line in io.lines("/proc/stat") do
+           local cpu, newjiffies = string.match(line, "(cpu\ )\ +(%d+)")
+           if cpu and newjiffies then
+               if not jiffies[cpu] then
+                   jiffies[cpu] = newjiffies
+               end
+               --The string.format prevents your task list from jumping around 
+               --when CPU usage goes above/below 10%
+               --s = string.format("0.%02d", (newjiffies-jiffies[cpu])) 
+               s = string.format("%d", ((newjiffies-jiffies[cpu]))) 
+               jiffies[cpu] = newjiffies
+           end
+       end
+       --return s
+			 --naughty.notify { text = s }
+			 mygraph:add_value(s)
+   end
+
+
+cpu_timer = timer({ timeout = 1 })
+cpu_timer:add_signal("timeout", function() activecpu () end)
+cpu_timer:start()
 
 
 ------------------------- Helius end --------------------------------------
