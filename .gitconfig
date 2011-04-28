@@ -2,5 +2,12 @@
 	name = eugene
 	email = ghelius@gmail.com
 [color]
-[color]
 	diff = always
+[merge]
+	tool = vimdiff
+[core]
+	editor = vim
+[diff]
+	external = git_diff_wrapper
+[pager]
+	diff =

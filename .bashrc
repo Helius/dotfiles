@@ -107,6 +107,13 @@ fi
 shopt -u mailwarn
 unset MAILCHECK         # чтобы командная оболочка не сообщала о прибытии почты
 
+#--------------
+# some functions
+
+function git_diff() {
+	  git diff --no-ext-diff -w "$@" | vim -R -
+}
+
 #---------------
 # Prompt
 #---------------
