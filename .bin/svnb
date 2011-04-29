@@ -1,0 +1,559 @@
+#!/bin/bash
+#bash svn browser
+#author: Eugene aka Helius (ghelius@gmail.com)
+VERSIONS="1.2"
+###############################################################################
+# TODO:
+# BUGLIST:
+# CHANGELOG:
+# v1.2:
+#		fix bug: at "copy" or "move" was missing input comments dialog, and svn not doing cp/mv without comments
+# --------------------------------------------
+# common definition
+NUM_OF_COMMENT=5		# количество выводимых коментариев
+KEY_HELP="h"				# дефайны для кнопок
+KEY_QUIT="q"				# дефайны для кнопок
+KEY_COPY="y"
+KEY_CUT="x"
+KEY_PASTE="p"
+KEY_LOG="l"
+KEY_EXRPT="e"
+KEY_CHOUT="c"
+KEY_MKDIR="m"
+KEY_RENAME="r"
+KEY_DEL="d"
+# --------------------------------------------
+# получаем пути из рабочей копии
+if [ -d ".svn/entries" ] ; then 
+	SVN_PATH=`cat .svn/entries | grep -m2 ://` 
+	SVN_WC_FULL_PATH=`echo $SVN_PATH | grep -o '^.*\ '`
+	SVN_REPO_PATH=`echo $SVN_PATH | grep -o '\ .*$'`
+	SVN_REPO_PATH=`expr "$SVN_REPO_PATH" : '^ *\(.*\)'`
+	STRLEN=${#SVN_REPO_PATH}
+	SVN_WC_PATH=${SVN_WC_FULL_PATH:$STRLEN}
+	SVN_PATH_PTR=$SVN_WC_PATH
+	SVN_PATH_PTR="`expr $SVN_PATH_PTR: '\(.*\)\ *'`/"
+	echo $SVN_PATH_PTR
+fi
+SVN_LIST=""
+DIR_CNT=0
+V_CURSOR=""
+SELECTED=""
+WILL_CUT="FALSE"
+
+################ выводит help ###################
+function print_help {
+	echo "[1mBash svn browser v$VERSIONS[0m Usage:" 
+	echo "Bash svn browser simple script allow you to view into svn repository from you working copy." 
+	echo "Why from working copy? Because it contains full path to it's repository." 
+	echo "You also can run this script from not working copy, but you need enter the path to svn repo for view it." 
+	echo "  [1mKey binds command[0m:"
+	echo "  [1m$KEY_HELP[0m - this message"
+	echo "  [1m$KEY_QUIT[0m - quit"
+	echo "  [1m$KEY_COPY[0m - copy"
+	echo "  [1m$KEY_CUT[0m - cut"
+	echo "  [1m$KEY_PASTE[0m - paste"
+	echo "  [1m$KEY_RENAME[0m - rename"
+	echo "  [1m$KEY_LOG[0m - log"
+	echo "  [1m$KEY_DEL[0m - delete"
+	echo "  [1m$KEY_MKDIR[0m - make dir"
+	echo "  [1m$KEY_EXRPT[0m - export"
+	echo "  [1m$KEY_CHOUT[0m - checkout"
+	echo "  note: for checkout and export need enter the \"dest path\" without /home/user_name/, $HOME is adding by script"
+	echo "  cursor arrow - browse."
+	echo "  PageUP/PageDown now supported!"
+	echo ""
+	echo "Suggestions, bugs and thanks mail to ghelius@gmail.com"
+	echo "Thank you for use! :D"
+}
+
+################ выводит шапку ###################
+function menu_print_header {
+	echo "[1mBash svn browser v$VERSIONS[0m Usage: [4m[1mh[0melp, [4m[1mq[0muit, [4m[1my[0m copy, [4m[1mx[0m cut, [4m[1mp[0maste, [4m[1ml[0mog, [4m[1mr[0memane, [4m[1md[0melete, [4m[1mm[0makedir, [4m[1me[0mxport, [4m[1mc[0mheckout"
+	echo "--------------------------"
+	echo "You are here [$SVN_REPO_PATH]:$SVN_PATH_PTR"
+	echo ""
+}
+
+########### получаем список файлов ###############
+function svn_get_list {
+	SVN_LIST="`svn list "$SVN_REPO_PATH/$1"`"
+}
+
+####### вычисляем кол-во строк в списке ##########
+function menu_get_dir_cnt {
+	DIR_CNT=0
+	DIR_CNT="`echo "$SVN_LIST" | ( while read line
+	do 
+		((DIR_CNT++))
+	done; echo $DIR_CNT)`"
+}
+
+#"
+######## выясняем выбранную директорию ###########
+function menu_get_SELECTED {
+	local CNT=0
+	SELECTED=`echo "$SVN_LIST" | ( while read line
+	do 
+			if [[ "$CNT" -eq "$V_CURSOR" ]] # если курсор установлен на это меню - выделить его
+				then
+					echo "$line"
+			fi 
+			((CNT++))
+	done;)`
+}
+
+
+########## выясняем позицию в списке ############
+####### для директории откуда вернулись #########
+########## чтоб оставить курсор на ней ##########
+function menu_get_prev_dir_ind {
+	local CNT=0
+	V_CURSOR=`echo "$SVN_LIST" | ( while read line
+	do 
+			if [ "$line" == "$SELECTED" ] 
+				then
+					echo "$CNT"
+					break
+			fi 
+			((CNT++))
+	done;)`
+}
+
+
+############ выводит на экран список #############
+function menu_print_list {
+	let CNT=0
+
+	echo "$SVN_LIST" | while read line
+		do
+		if [[ "$CNT" -ge "$START_STR" && "$CNT" -lt "$(($START_STR+$LINE_PER_PAGE))" ]]
+		then
+				if [ "`expr "$line" : '.*/$'`" -ne "0" ] # если это директория
+				then
+					if [[ "$CNT" -eq "$V_CURSOR" ]] # если курсорр установлен на это меню - выделить его
+					then
+						echo "[7m[1m$line[0m"
+					else
+						echo "[1m$line[0m"
+					fi
+				else
+					if [[ "$CNT" -eq "$V_CURSOR" ]] # если курсорр установлен на это меню - выделить его
+					then
+						echo "[7m$line[0m"
+					else
+						echo "[0m$line[0m"
+					fi
+				fi
+		fi
+		CNT=`expr $CNT + 1`
+		
+		done 
+}
+
+########### сдвинуть указатель в лево #############
+function menu_move_left {
+	SELECTED="`expr "$SVN_PATH_PTR" : '^.*/\(.*/$\)'`"
+	SVN_PATH_PTR="`expr "$SVN_PATH_PTR" : '\(^.*/\).*/$'`"
+	if [ -z "$SVN_PATH_PTR" ] 
+		then
+		SVN_PATH_PTR= "/"
+		fi
+}
+
+########## сдвинуть указатель в право #############
+function menu_move_right {
+		SVN_PATH_PTR="$SVN_PATH_PTR$SELECTED"
+		V_CURSOR=0;
+}
+
+########## войти в директорию под курс.############
+function menu_left {
+	if [[  "$SVN_PATH_PTR" != "/" ]] # если есть куда двигаться
+		then
+		clear;
+		menu_move_left
+		svn_get_list "$SVN_PATH_PTR"
+		menu_get_prev_dir_ind
+		menu_get_dir_cnt
+		menu_get_SELECTED
+		menu_print_screen
+	fi
+}
+
+######### выйти на уровень ближе к корню ##########
+function menu_right {
+	if [ "`expr "$SELECTED" : '.*/$'`" -eq 0 ] # проверяем что выбрана директория, в файл перейти нельзя :D
+	then
+		SELECTED=""
+	fi
+	if [ -n "$SELECTED" ]
+	then
+		clear;
+		menu_move_right
+		svn_get_list "$SVN_PATH_PTR"
+		V_CURSOR=0
+		menu_get_dir_cnt
+		menu_get_SELECTED
+		menu_print_screen
+	fi
+}
+
+########### вывести экран на экран :D #############
+function menu_print_screen {
+		LINE_PER_PAGE=$((`tput lines` - 8))
+		let "PAGE_NMB= V_CURSOR / LINE_PER_PAGE"				#номер текущей страницы
+		let "PAGE_CURSOR= V_CURSOR % LINE_PER_PAGE"			#позиция курсора в странице
+		let "START_STR= PAGE_NMB * LINE_PER_PAGE"				#номер первой строки в страницэ
+		menu_print_header
+		if [[ $PAGE_NMB -ne "0"  ]]
+			then
+				echo "^^^^^^^^^^"
+			else
+				echo "============"
+		fi
+		menu_print_list
+		menu_get_SELECTED
+		if [[ $(($DIR_CNT-$START_STR-1)) -lt $LINE_PER_PAGE ]]
+		then
+			echo "============"
+		else
+			echo "vvvvvvvv"
+		fi
+}
+
+####### сдвинуть курсор вверх в списке ############
+function menu_up {
+	if [[ $V_CURSOR -ne "0" ]]
+		then
+		clear;
+		if [[ $V_CURSOR -lt $1 ]]
+		then
+			V_CURSOR=0
+		else
+			let V_CURSOR=$(($V_CURSOR-$1))
+		fi
+		menu_print_screen	
+	fi
+}
+
+######### сдвинуть курсов вниз в списке ##########
+function menu_down {
+	if [[ $V_CURSOR -lt $(($DIR_CNT-1)) ]]
+		then
+		clear;
+		if [[ $(($V_CURSOR+$1)) -ge $DIR_CNT ]]
+		then
+			V_CURSOR=$(($DIR_CNT-1))
+		else
+			let V_CURSOR=$((V_CURSOR+$1))
+		fi
+		menu_print_screen
+	fi
+}
+
+########## сохранить путь под курсором ###########
+function menu_copy {
+	clear;
+	menu_print_screen
+	COPY_PATH="$SVN_REPO_PATH$SVN_PATH_PTR$SELECTED"
+	WILL_CUT="FALSE"
+	echo "Copy: $COPY_PATH"
+}
+
+########## вырехать путь под курсором ###########
+function menu_cut {
+	clear;
+	menu_print_screen
+	COPY_PATH="$SVN_REPO_PATH$SVN_PATH_PTR$SELECTED"
+	WILL_CUT="TRUE"
+	echo "Cut: $COPY_PATH"
+}
+
+##### скопирование/вставить в текущее место ######
+function menu_paste {
+	MESS=""
+	if [ -z "$COPY_PATH" ]
+	then
+		echo "You need copy or cut first, \"y\" or \"x\" - key"
+	else
+		if [ "$WILL_CUT" == "TRUE" ]
+		then
+			local DST_PATH="$SVN_REPO_PATH$SVN_PATH_PTR"
+			echo "[1mMove[0m:[$COPY_PATH]"
+			echo "into: [$DST_PATH]"
+			echo -n "Put comment: "
+			read comment
+			if [ -z "$comment" ] ; then
+				comment="no comment inputed"
+			fi
+				MESS=`svn mv "$COPY_PATH" "$DST_PATH" -m"$comment"`
+		elif [ "$WILL_CUT" == "FALSE" ]
+		then
+			echo "[1mCopy[0m:[$COPY_PATH]"
+			echo -n "[1mPaste[0m Type name (empty - cancel):"
+			read name
+			if [ -n "$name" ]
+			then
+				echo -n "Put comment: "
+				read comment
+				if [ -z "$comment" ] ; then
+					comment="no comment inputed"
+				fi
+				local DST_PATH="$SVN_REPO_PATH$SVN_PATH_PTR$name"
+				MESS=`svn cp "$COPY_PATH" "$DST_PATH" -m"$comment"`
+			fi
+		fi
+
+	clear;
+	svn_get_list "$SVN_PATH_PTR"
+	menu_print_screen
+	if [ -n "$name" ] ;	then
+		echo "Copyed from:[$COPY_PATH]"
+		echo "To:[$DST_PATH]"
+		echo "$MESS"
+	else
+		echo "Canceled"
+	fi
+	menu_get_dir_cnt
+	fi
+	WILL_CUT="FALSE";
+	COPY_PATH=""
+}
+
+########### вывести лог на экран #############
+function menu_log {
+	clear;
+	menu_print_screen
+	echo "log for $SVN_PATH_PTR$SELECTED"
+	SVN_LOG=`svn log -l $NUM_OF_COMMENT "$SVN_REPO_PATH$SVN_PATH_PTR$SELECTED"`
+	echo "$SVN_LOG"
+}
+
+########### удалить директорию ##############
+function menu_del {
+	MESS=""
+	local DST_PATH="$SVN_REPO_PATH$SVN_PATH_PTR$SELECTED"
+	echo "[7mDelete?[0m $SVN_REPO_PATH$SVN_PATH_PTR[1m$SELECTED[0m"
+	echo -n "Type (y/n):"
+	read agree
+	if [ $agree == "y" ]
+		then
+		echo "Put comment:"
+		read comment
+		MESS=`svn rm "$DST_PATH" -m"$comment"`
+	fi
+	clear;
+	svn_get_list "$SVN_PATH_PTR"
+	menu_print_screen
+	echo "$MESS"
+	if [ $agree == "y"  ]
+		then
+		echo "$MESS"
+	else
+		echo "Canceled"
+	fi
+}
+
+########### создать директорию ##############
+function menu_mkdir {
+	MESS=""
+	echo -n "[1mMakedir[0m Type name (empty - cancel):"
+	name=""
+	read name
+	if [ -n "$name"  ]
+		then
+		local DST_PATH="$SVN_REPO_PATH$SVN_PATH_PTR$name"
+		echo " New:[$DST_PATH]"
+		echo "Put comment:"
+		read comment
+		MESS=`svn mkdir "$DST_PATH" -m"$comment"`
+	fi
+	clear;
+	svn_get_list "$SVN_PATH_PTR"
+	menu_get_dir_cnt
+	menu_print_screen
+	if [ -n "$name"  ]
+		then
+		echo "$MESS"
+	else
+		echo "Canceled"
+	fi
+}
+
+########### переименовать ##############
+function menu_rename {
+	MESS=""
+	echo -n "[1mReName[0m Type name (empty - cancel):"
+	name=""
+	read name
+	if [ -n "$name"  ]
+		then
+		local SRC_PATH="$SVN_REPO_PATH$SVN_PATH_PTR$SELECTED"
+		local DST_PATH="$SVN_REPO_PATH$SVN_PATH_PTR$name"
+		echo " From:[$SRC_PATH]"
+		echo " To  :[$DST_PATH]"
+		echo "Put comment:"
+		read comment
+		MESS=`svn mv "$SRC_PATH" "$DST_PATH" -m"$comment"`
+	fi
+	clear;
+	svn_get_list "$SVN_PATH_PTR"
+	menu_get_dir_cnt
+	menu_print_screen
+	if [ -n "$name"  ]
+		then
+		echo "$MESS"
+	else
+		echo "Canceled"
+	fi
+}
+############# экспортировать ###############
+function menu_export {
+	MESS=""
+	local SRC_PATH="$SVN_REPO_PATH$SVN_PATH_PTR$SELECTED"
+	echo "[1mExport[0m: $SRC_PATH"
+	echo -n "Type path to [1mexport[0m (empty - cancel):~/"
+	path=""
+	read path
+	if [ -n "$path"  ]
+		then
+		local DST_PATH="$HOME/$path"
+		MESS=`svn export "$SRC_PATH" "$DST_PATH"`
+	fi
+	clear;
+	svn_get_list "$SVN_PATH_PTR"
+	menu_get_dir_cnt
+	menu_print_screen
+	if [ -n "$path"  ]
+		then
+		echo "Export: $SRC_PATH"
+		echo "to $DST_PATH"
+		echo "$MESS"
+	else
+		echo "Canceled"
+	fi
+}
+
+############ сделать checkout ##############
+function menu_checkout {
+	MESS=""
+	if [ "`expr "$SELECTED" : '.*/$'`" -eq 0 ] # проверяем что выбрана директория, файл извлечь нельзя
+	then
+		echo "Check directory, please, file not be checkouted"
+	else
+		local SRC_PATH="$SVN_REPO_PATH$SVN_PATH_PTR$SELECTED"
+		echo "[1mCheckout[0m: $SRC_PATH"
+		echo -n "Type path to [1mcheckout[0m (empty - cancel):~/"
+		path=""
+		read path
+		if [ -n "$path"  ]
+			then
+			local DST_PATH="$HOME/$path"
+			MESS=`svn co "$SRC_PATH" "$DST_PATH"`
+		fi
+		clear;
+		svn_get_list "$SVN_PATH_PTR"
+		menu_get_dir_cnt
+		menu_print_screen
+		if [ -n "$path"  ]
+			then
+			echo "Checkout: $SRC_PATH"
+			echo "to $DST_PATH"
+			echo "$MESS"
+		else
+			echo "Canceled"
+		fi
+	fi
+}
+#******************* старт скрипта ***********************
+################ выводим главное окно ####################
+if [[ -z "$SVN_PATH" ]]
+	then
+	echo "[1mERROR: \"$PWD\" Not a svn working copy[0m"
+	echo "You may input repo path:"
+	read SVN_REPO_PATH
+	if [ -z $SVN_REPO_PATH ]
+	then
+		exit 1
+	else
+		$SVN_PATH_PTR="/"
+	fi
+fi
+################## выводим стартовый экран ###############
+clear;
+svn_get_list "$SVN_PATH_PTR"
+menu_get_dir_cnt
+menu_print_screen
+############ бесконечный цикл ожидания ввода #############
+# Прочитать 1 символ. -s отключить эхо, -n1 только один символ, -r считывать "\" не дожидаясь экранирования
+while read -s -n1 key                      
+do
+	if [ "$key" == $KEY_COPY ]
+	then
+		menu_copy
+	elif [ "$key" == $KEY_CUT ]
+	then
+		menu_cut
+	elif [ "$key" == $KEY_PASTE ]
+	then
+		menu_paste
+	elif [ "$key" == $KEY_EXRPT ]
+	then
+		menu_export
+	elif [ "$key" == $KEY_CHOUT ]
+	then
+		menu_checkout
+	elif [ "$key" == $KEY_MKDIR ]
+	then
+		menu_mkdir
+	elif [ "$key" == $KEY_RENAME ]
+	then
+		menu_rename
+	elif [ "$key" == $KEY_DEL ]
+	then
+		menu_del
+	elif [ "$key" == $KEY_LOG ]
+	then
+		menu_log
+	elif [ "$key" == $KEY_HELP ]
+	then
+		clear;
+		print_help
+	elif [ "$key" == "" ]
+	then
+		cursor_ind="1"
+	elif [[ "$key" == "[" && $cursor_ind == "1" ]]
+		then
+			cursor_ind="2"
+	elif [[ "$key" == "A" && $cursor_ind == "2" ]]
+			then
+				cursor_ind="0"
+				menu_up 1
+	elif [[ "$key" == "B" && $cursor_ind == "2" ]]
+			then
+				cursor_ind="0"
+				menu_down 1
+	elif [[ "$key" == "C" && $cursor_ind == "2" ]]
+			then
+				cursor_ind="0"
+				menu_right
+	elif [[ "$key" == "D" && $cursor_ind == "2" ]]
+			then
+				cursor_ind="0"
+				menu_left
+	elif [[ "$key" == "5" && $cursor_ind == "2" ]]
+			then
+				cursor_ind="0"
+				menu_up $LINE_PER_PAGE
+	elif [[ "$key" == "6" && $cursor_ind == "2" ]]
+			then
+				cursor_ind="0"
+				menu_down $LINE_PER_PAGE
+	elif [ "$key" == $KEY_QUIT ]
+			then
+			echo "Last path: $SVN_REPO_PATH$SVN_PATH_PTR"
+			exit 0
+	fi
+done
+

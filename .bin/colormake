@@ -1,0 +1,236 @@
+#! /usr/bin/perl -w
+
+# $Id: colormake,v 1.0 by Helius (ghelius@gmail.com)
+#
+# A wrapper to colorize the output from make and compilers whose messages
+# match the "gcc" format.
+#
+# Requires the ANSIColor module from CPAN.
+#
+# Usage:
+#
+# In a directory that occurs in your PATH _before_ the directory
+# where the compiler lives (~/.bin/ for me), create a softlink to colomake for
+# each compiler you want to colorize:
+#
+#    make -> colormake
+#
+# The default settings can be overridden with ~/.colormake
+#
+# Note:
+#
+# colormake will only emit color codes if:
+# 
+#    (1) Its STDOUT is a tty and
+#    (2) the value of $TERM is not listed in the "nocolor" option.
+#
+# If colormake colorizes the output, the compiler's STDERR will be
+# combined with STDOUT. Otherwise, colormake just passes the output from
+# the compiler through without modification.
+# 
+# Licence: GNU Public License
+#
+# Credits:
+#
+#    I got the idea for this from a script called "colorgcc" by Jamie Moyers <jmoyers@geeks.com>
+#
+# Changes:
+#
+
+use Term::ANSIColor;
+use IPC::Open3;
+
+
+$makePaths{"make"} = "/usr/bin/make";
+
+sub initDefaults
+{
+  # $nocolor{"dumb"} = "true";
+
+   $colors{"srcColor"} = color("cyan");
+   $colors{"introColor"} = color("blue");
+
+   $colors{"warningFileNameColor"} = color("yellow");
+   $colors{"warningNumberColor"}   = color("yellow");
+   $colors{"warningMessageColor"}  = color("yellow");
+
+   $colors{"errorFileNameColor"} = color("bold red");
+   $colors{"errorNumberColor"}   = color("bold red");
+   $colors{"errorMessageColor"}  = color("bold red");
+}
+
+#*****************************************************************************
+# scan in make stdout lines for command, files, etc...
+sub make_scan
+{
+# Usage: srcscan($text, $normalColor)
+#    $text -- the text to colorize
+#    $normalColor -- The escape sequence to use for non-source text.
+
+# Looks for text between ` and ', and colors it srcColor.
+
+   my($line, $normalColor) = @_;
+
+   my($err_on) = color ("bold red");
+   my($err_off) = color("reset");
+
+   $line = $normalColor . $line;
+
+   # This substitute replaces `foo' with `AfooB' where A is the escape
+   # sequence that turns on the the desired source color, and B is the
+   # escape sequence that returns to $normalColor.
+
+		# parce 'error'
+   $line =~ s/\s(.*?(?:Ошибка|error).*)/$err_on$1$err_off/gi;
+
+   print($line, color("reset"));
+}
+
+#*****************************************************************************
+#	scan in gcc/make line for keys or filenames etc...
+sub src_scan
+{
+# Usage: srcscan($text, $normalColor)
+#    $text -- the text to colorize
+#    $normalColor -- The escape sequence to use for non-source text.
+
+# Looks for text between ` and ', and colors it srcColor.
+
+   my($line, $normalColor) = @_;
+
+   my($srcon) = color("reset") . $colors{"srcColor"};
+   my($srcoff) = color("reset") . $normalColor;
+   my($libon) = color("reset") . color ("blue");
+   my($liboff) = color("reset") . $normalColor;
+   my($fileon) = color("reset") . color ("green");
+   my($fileoff) = color("reset") . $normalColor;
+   my($inclon) = color("reset") . color ("cyan");
+   my($incloff) = color("reset") . $normalColor;
+   my($defon) = color("reset") . color ("magenta");
+   my($defoff) = color("reset") . $normalColor;
+
+   $line = $normalColor . $line;
+
+   # This substitute replaces `foo' with `AfooB' where A is the escape
+   # sequence that turns on the the desired source color, and B is the
+   # escape sequence that returns to $normalColor.
+
+		# parce `string'
+   $line =~ s/\`(.*?)\'/\`$srcon$1$srcoff\'/g;
+		# parce -lstring
+   $line =~ s/\s(-l[-a-zA-Z0-9_=]*)/$libon$1$liboff\ /g;
+		#parce file.ext
+   $line =~ s/\s([^-]\S+\.)(o|cpp|c)/\ $fileon$1$2$fileoff\ /g;
+		#parce -Iinclude
+   $line =~ s/\s(-[IL]\S+)/$inclon$1$incloff\ /g;
+		#parce -Ddefine
+   $line =~ s/\s(-D\S+)/$defon$1$defoff\ /g;
+
+   print($line, color("reset"));
+}
+
+
+#
+# Main program
+#
+
+# check make input parametr for off/on coloring
+foreach (@ARGV) {
+	if (($_=~m%coloroff%)&&(!(-e "$ENV{HOME}/.colormake-off"))) {
+		print "\n\n\t\t\033[7;31mcolor make off\033[0m\n\n";
+		system `touch $ENV{HOME}/.colormake-off`;
+		exit;
+	} elsif (($_=~m%coloron%) && (-e "$ENV{HOME}/.colormake-off")) {
+		print "\n\n\t\t\033[7;32mcolor make on\033[0m\n\n";
+		system `rm $ENV{HOME}/.colormake-off`;
+		exit;
+	}
+}
+
+# Figure out which compiler to invoke based on our program name.
+$0 =~ m%.*/(.*)$%;
+$progName = $1 || $0;
+
+$make = $makePaths{$progName} || $makePaths{"make"};
+
+
+# check if file exist - no color
+if (-e "$ENV{HOME}/.colormake-off") {
+	exec $make, @ARGV
+		or die("Couldn't exec");
+}
+
+# Set up default values for colors and compilers.
+initDefaults();
+
+
+
+# If it's in the list of terminal types not to color, or if
+# we're writing to something that's not a tty, don't do color.
+if (! -t STDOUT )
+{
+	exec $make, @ARGV
+		or die("Couldn't exec");
+}
+
+# Keep the pid of the compiler process so we can get its return
+# code and use that as our return code.
+$make_pid = open3('<&STDIN', \*MAKEOUT, '', $make, @ARGV);
+
+# Colorize the output from the compiler.
+while(<MAKEOUT>)
+{
+   if (m/^(make.*):(.*)$/) # 
+   {
+      $field1 = $1 || "";
+      $field2 = $2 || "";
+			print(color("red"), "$field1:", color("reset"));
+			make_scan($field2, color("reset"));
+			print("\n");
+   }
+   elsif (m/(.*)?(WARNING):(.*)/i)
+   {
+      $field1 = $1 || "";
+      $field2 = $2 || "";
+      $field3 = $3 || "";
+			print(color("green"),"$field1", color("yellow"), "$field2:", color("reset"));
+			src_scan($field3, color("yellow"));
+			print("\n");
+   }
+   elsif (m/(.*)?(error):(.*)/i)
+   {
+      $field1 = $1 || "";
+      $field2 = $2 || "";
+      $field3 = $3 || "";
+			print(color("green"), "$field1 ", color("reverse red"), "$field2:", color("reset"));
+			src_scan($field3, color("bold red"));
+			print("\n");
+   }
+   elsif (m/^(.*?(?:cc|gcc|g\+\+)[-a-z+]*)(.*)/)
+   {
+      $field1 = $1 || "";
+      $field2 = $2 || "";
+			print(color("red"), "$field1 ", color("reset"));
+			src_scan($field2, color("reset"));
+			print("\n");
+   }
+   elsif (m/^(ar|rm|cp|mv|gawk|grep)(.*)/i)
+   {
+      $field1 = $1 || "";
+      $field2 = $2 || "";
+      
+			print(color("red"), "$field1 ", color("reset"), "$field2");
+			#sh_scan($field2, color("reset"));
+			print("\n");
+   }
+   else # Anything else.        
+   {
+      # Doesn't seem to be a warning or an error. Print normally.
+      print(color("reset"), $_);
+   }
+}
+
+# Get the return code of the compiler and exit with that.
+waitpid($make_pid, 0);
+exit ($? >> 8);
+

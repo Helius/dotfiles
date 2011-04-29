@@ -1,0 +1,868 @@
+#! /usr/bin/perl -w
+
+use strict;
+use utf8;
+use Term::ANSIColor;
+use Term::ReadKey;
+
+#												Windows subsystem
+#*****************************************************************************
+my $br_header_height = 8;
+my $br_footer_height = 7;
+
+my $log_header_height = 8;
+my $log_footer_height = 12;
+
+my ($wchar, $hchar, $wpixels, $hpixels) = GetTerminalSize(); 
+my $list_height = $hchar;
+my $list_width = $wchar;
+
+if ($br_header_height + $br_footer_height + 2 > $list_height) {
+	print "Terminal height too small\n";
+	exit;
+}
+my $br_act_height = $list_height - $br_header_height - $br_footer_height;
+
+if ($log_header_height + $log_footer_height + 2 > $list_height) {
+	print "Terminal height too small\n";
+	exit;
+}
+my $log_act_height = $list_height - $log_header_height - $log_footer_height;
+
+
+
+my $version = "v1.3";
+my @svn_dir_list;
+my @svn_log_list;
+my $svn_repo_path = "";
+my $svn_cur_path = "";
+my $file_cursor = 0;
+my $log_cursor = 0;
+my $top_log_list = 0;
+my $top_file_list = 0;
+my $mode = "br";
+
+my $br_work = "";
+my $br_line_0 = "";
+my $br_line_1 = "";
+my $br_line_2 = "";
+
+
+
+#*****************************************************************************
+sub exit_ ()
+{
+	ReadMode "restore";
+	print "\033[2J"; #clear screen
+	print "\033[0d"; #go top
+	print "You was here:\n", $svn_repo_path . $svn_cur_path, "\n";
+	exit;
+}
+
+sub print_usage ()
+{
+	print "svn perl browser for cli $version\n";
+	print "depends on subversion svn command line tool (you may install it: #aptitude install subversion)\n"
+}
+
+#*****************************************************************************
+sub check_wc (@)
+{
+	foreach (@ARGV) {
+		if ($_ =~ m%help%) {
+			print_usage ();
+			exit;
+		} elsif ($_ =~m%([^-\s]*)%) {
+			print "path detected: $1\n";
+			$_[0] = $1;
+			$_[1] = "";
+			return;
+		}
+	} 
+
+	my @svn_path;
+	open FILE, "<.svn/entries" or die $!;	
+
+	while (<FILE>) {
+		if ($_=~m/^(http|svn|file)(:.+)/) {
+			push(@svn_path, "$1$2")
+		}
+	}
+	close FILE;
+
+	if ($svn_path[0] =~m /($svn_path[1])(.*)/) {
+		$_[0] = $1;  
+		$_[1] = $2;
+	} else {
+		print "'.' is not svn working copy";
+		exit;
+	}
+}
+
+
+# read 'svn ls -v' output and store it to array '@svn_dir_list'
+# splite each entry on separate field
+#*****************************************************************************
+sub get_svn_list ($_)
+{
+	$#svn_dir_list = -1;
+ 
+ 	my @result = `svn list -v $_[0]`;
+ 	chomp (@result);
+ 	foreach (@result) {
+
+	 		$_ =~ m/\s([0-9]+)\s([-.\wа-яА-Я]*)\s+([0-9]+|)\s+(.*)/;
+	 		my $rev = $1;
+	 		my $author = $2;
+	 		my $size = $3;
+	 		my $tail = $4;
+
+	 		$tail =~ s/(.*?)([-\w.\/]+)$/$1/;
+	 		my $file = $2;
+	 		
+			my $svn_dir_entry = "   |" . $file . "|" . $size . "|" . $rev . "|" . $author . "|" . $tail;
+			push (@svn_dir_list, $svn_dir_entry);
+	}
+}
+
+# return file where cursor is set
+#*****************************************************************************
+sub file_under_cursor ()
+{
+	for (my $ind = 0; $ind <= $#svn_dir_list; $ind++) {
+		(my $flag, my $file) = split (/\|/, $svn_dir_list[$ind]);
+
+		if ($ind == $file_cursor) {
+			return $file;
+		}
+	}
+}
+
+#*****************************************************************************
+sub get_svn_log ($_)
+{
+	$#svn_log_list = -1;
+	my $logentry;
+	my $in_entry = 0;
+	my @tmp_log_list;
+	my @result = `svn log --xml --stop-on-copy -v $_[0]`;
+	chomp @result;
+
+	foreach (@result) {
+		if ($in_entry == 1) {
+			$logentry = $logentry . $_;
+		}
+		if ($_ eq "<logentry") {
+			$logentry = "";
+			$in_entry=1;
+		}
+		if ($_ eq "</logentry>") {
+			push (@tmp_log_list, $logentry);
+			$logentry = "";
+			$in_entry=0;
+		}				
+	}
+	#print "@tmp_log_list";
+
+	foreach (@tmp_log_list) {
+		$_ =~ s/revision=\"([0-9]+)\"//;
+		my $rev = $1;
+
+		$_ =~ s/<author>(.*)<\/author>//;
+		my $author = $1;
+		
+		$_ =~ s/<msg>(.*)<\/msg>//;
+		my $msg = $1;
+		
+		$_ =~ s/<date>([-0-9]*)T([0-9:]*).*<\/date>//;
+		my $date = $1 ." ". $2;
+		
+		$_ =~ s/<paths>(.*)<\/paths>//;
+		my $paths = $1;
+		my $svnflags = "    ";
+		my $files ="";
+		while ($paths =~ m/<path.*?action="(.)".*?>(.*?)<\/path>/igm) {
+			$files = $files . $1 . " " . $2 . "}";
+			if ($1 eq "M") {
+				substr($svnflags, 1,1) = "M";
+			} elsif ($1 eq "A") {
+				substr($svnflags, 0,1) = "A";
+			} elsif ($1 eq "D") {
+				substr($svnflags, 2,1) = "D";
+			} elsif ($1 eq "R") {
+				substr($svnflags, 3,1) = "R";
+			}
+		}
+
+		my $log_string = "   |" . $rev . "|". $svnflags . "|" . $author . "|" . $date . "|" . $msg . "|" . $files;
+		push (@svn_log_list, $log_string);
+	}
+}
+
+
+sub print_log_revinfo ()
+{
+}
+
+# print file (dir) string from svn_dir_list, number put in parameters
+# split each field of line to collumn
+#*****************************************************************************
+sub print_log_string ($_)
+{
+	if ($_[0] > $#svn_log_list) {
+		print "\n";
+		return;
+	}
+
+	if ($_[0] == $log_cursor) {
+		print "" . color ("reverse") . "";
+	}
+
+	(my $flag, my $rev, my $svnflags, my $author, my $date, my $msg, my $paths) = split (/\|/, $svn_log_list[$_[0]]);
+ 
+	print $flag;
+
+	my $space = 6 - length($rev);
+
+	print "$rev";
+	for (my $digit = 0; $digit <=$space; $digit++) {
+				print " ";
+	}
+	print $svnflags, "   ";
+
+	$space = 15 - length($author);
+	print "$author";
+	for (my $digit = 0; $digit <=$space; $digit++) {
+				print " ";
+	}
+	$space = 22 - length($date);
+	print "$date";
+	for (my $digit = 0; $digit <=$space; $digit++) {
+				print " ";
+	}
+	$msg =~ s/\n//g; # remove carriage return
+	$msg = substr ($msg, 0, $list_width - 6 - 15 - 22 ); #TODO: calc it!
+	print "$msg";
+	
+	print color ("reset") . "\n";
+}
+
+# switch between 'browser' and 'log viewer' mode
+#*****************************************************************************
+sub toggle_log_mode ()
+{
+	if ($mode eq "br") {
+		$mode = "log";
+		get_svn_log ($svn_repo_path . $svn_cur_path . "/" . file_under_cursor ());
+	} else {
+		$mode = "br";
+	}
+	
+	print_screen ();
+}
+
+# print file (dir) string from svn_dir_list, number put in parameters
+# split each field of line to collumn
+#*****************************************************************************
+sub print_file_string ($_)
+{
+	my $str = "";
+
+	if ($_[0] > $#svn_dir_list) {
+		print "\n";
+		return;
+	}
+#  my $dir_on ="\033[1;34m";
+#  my $dir_nml = "\033[0;30m";
+   my($dir_on) = color ("bold blue");
+
+	(my $flag, my $file, my $size, my $rev, my $author, my $tail) = split (/\|/, $svn_dir_list[$_[0]]);
+ 
+   print $flag;
+
+   if ($_[0] == $file_cursor) {
+     print "" . color ("reverse") . "";
+   }
+   my $space = 30 - length($file);
+   $file =~ s/(.*)\/$/$dir_on$1\//;
+
+   print "$file";
+   for (my $digit = 0; $digit <=$space; $digit++) {
+         print " ";
+   }
+   $space = 7 - length($size);
+   print "$size";
+   for (my $digit = 0; $digit <=$space; $digit++) {
+         print " ";
+   }
+   $space = 6 - length($rev);
+   print "$rev";
+   for (my $digit = 0; $digit <=$space; $digit++) {
+         print " ";
+   }
+   $space = 15 - length($author);
+   print "$author";
+   for (my $digit = 0; $digit <=$space; $digit++) {
+         print " ";
+   }
+
+	my $datetime = "                                  ";
+	$tail =~m/(.*)\s+([0-9]+)\s+([:0-9]+)/i;	
+	if ((defined $3)&&(length($3)>4)) {
+		substr ($datetime, 0, 8) = $3;
+	}
+	if (defined $2) {
+		substr ($datetime, 8, 2) = $2;
+	}
+	if (defined $1) {
+		substr ($datetime, 11, 10) = $1;
+	}
+	if ((defined $3)&&(length($3)<5)) {
+		substr ($datetime, 21, 10) = $3;
+	}
+
+	print $datetime;
+  print "" . color("reset") . "\n";
+}
+
+# set_screen_cursor (x, y); x>0, y>0
+# set_screen_cursor (x); x>0
+#*****************************************************************************
+sub set_screen_cursor ($_)
+{
+	if (defined $_[1]) {
+		print "\033[" . $_[1] . ";" . $_[0] . "H";
+	} else {
+		print "\033[" . $_[0] . "G";
+	}
+}
+
+sub clear_line ()
+{
+	print "\033[K\n";
+	print "\033[A";
+}
+
+#*****************************************************************************
+sub print_br_head ()
+{
+	set_screen_cursor (1,1);
+	clear_line ();
+	my $ind = ($list_width/2) - 20;
+	while ($ind > 1) {
+		print " ";
+		$ind--;
+	}
+	print color("bold") . "Repo browser $version" . color("reset") . "\n";
+	clear_line ();
+	print color ("bold green") . "l" . color ("reset"). "og/browser switch, ";
+	print color ("bold green") . "c" . color ("reset"). "opy, ";
+	print "c" . color ("bold green") . "u" . color ("reset"). "t, ";
+	print color ("bold green") . "p" . color ("reset") . "aste, ";
+	print color ("bold green") . "m" . color ("reset") . "ake dir, ";
+	print color ("bold green") . "d" . color ("reset") . "elete\n";
+	clear_line ();
+	print "\n";
+	clear_line ();
+	print "[$svn_repo_path:]", "$svn_cur_path\n";
+	$ind = $list_width;
+	while ($ind--) {
+		print "-";
+	}
+	print "\n";
+	clear_line ();
+	print  color ("bold") . "     name                         size    rev    author           date time\n"; 
+	clear_line ();
+	print color("reset") . "\n"
+}
+
+#*****************************************************************************
+sub print_log_head ()
+{
+	set_screen_cursor (1,1);
+	clear_line ();
+	my $ind = ($list_width/2) - 20;
+	while ($ind > 1) {
+		print " ";
+		$ind--;
+	}
+	print color("bold") . "Log viewer" . color("reset") . "\n";
+	clear_line ();
+	print "\n";
+	clear_line ();
+	print "$svn_cur_path\n";
+	clear_line ();
+	$ind = $list_width - 1;
+	while ($ind--) {
+		print "-";
+	}
+	print "\n";
+	clear_line ();
+	print  color ("bold") . "   rev   flags   author               date time                          message" . color ("reset") . "\n"; 
+	clear_line ();
+	print color("reset") . "\n"
+}
+
+
+# arguments:
+# 0: list_len
+# 1: list_top
+# 2: act_reg_len
+# 3: act_reg_Y0
+#*****************************************************************************
+sub print_scrollbar (@_)
+{
+	if (($_[0] < $_[1]) || ($_[0] == 0)) {
+		return;																									#if window is not full - no scrollbar
+	}
+	
+	my $scrollbar_len = ($_[2] * $_[2]) / $_[0];
+	my $scrollbar_Y = (($_[1] * $_[2]) / $_[0]) - 1;
+
+	for (my $ind = 0; $ind <= $_[2]; $ind++) {
+		set_screen_cursor ($list_width - 1, $ind + $_[3]);
+		if (($ind > $scrollbar_Y) && ($ind < $scrollbar_Y + $scrollbar_len)) {
+			print "X";
+		} else {
+			print "|";
+		}
+	}
+}
+
+#*****************************************************************************
+sub print_br_body ()
+{
+	set_screen_cursor (1, $br_header_height);
+	for (my $ind = 0; $ind <= $br_act_height; $ind++) {
+		set_screen_cursor (1);
+		clear_line ();
+		print_file_string ($ind + $top_file_list);
+	}
+	# 0: list_len
+	# 1: list_top
+	# 2: act_reg_len
+	# 3: act_reg_Y0
+	$_[0] = $#svn_dir_list;
+	$_[1] = $top_file_list;
+	$_[2] = $br_act_height;
+	$_[3] = $br_header_height;
+	print_scrollbar (@_);
+}
+
+#*****************************************************************************
+sub print_log_body ()
+{
+	set_screen_cursor (1, $log_header_height);
+	for (my $ind = 0; $ind <= $log_act_height; $ind++) {
+		set_screen_cursor (2);
+		clear_line ();
+		print_log_string ($ind + $top_log_list);
+	}
+	print_log_revinfo ();
+	
+	$_[0] = $#svn_log_list;
+	$_[1] = $top_log_list;
+	$_[2] = $log_act_height;
+	$_[3] = $log_header_height + 1;
+	print_scrollbar (@_);
+}
+
+#*****************************************************************************
+sub print_br_footer ()
+{
+	set_screen_cursor (1, $br_header_height + $br_act_height);
+	clear_line ();
+	my $ind = $list_width;
+	while ($ind--) {
+		print "-";
+	}
+	print "\n";
+	clear_line ();
+	print $br_work, "\n";
+	clear_line ();
+	print $br_line_0, "\n";
+	clear_line ();
+	print $br_line_1, "\n";
+	clear_line ();
+	print $br_line_2, "\n";
+#	set_screen_cursor (1, $br_header_height + $br_act_height );
+}
+
+#*****************************************************************************
+sub print_log_footer ()
+{
+	set_screen_cursor (1, $log_header_height + $log_act_height);
+	for (my $ind = 0; $ind < $log_footer_height; $ind++) {
+		clear_line ();
+		print "\n";
+	}
+	set_screen_cursor (1, $log_header_height + $log_act_height);
+
+	my $ind = $list_width;
+	while ($ind--) {
+		print "-";
+	}
+	print "\n";
+	(my $flag, my $rev, my $svnflags, my $author, my $date, my $msg, my $paths) = split (/\|/, $svn_log_list[$log_cursor]);
+
+	print color ("green") . "message:" . color ("reset");
+	print "\n $msg\n\n";
+	
+	my @filepath = split (/}/, $paths);
+	#if ($#filepath == 0) {
+	#	return;
+	#}
+#	for ($ind = 0; $ind <= $#filepath) {
+
+#	}
+
+	foreach (@filepath) {
+		print "$_\n";
+	}
+}
+
+# draw all screen
+#*****************************************************************************
+sub print_screen
+{
+	if ($mode eq "br") {
+		print_br_head ();
+		print_br_body ();
+		print_br_footer ();
+	} elsif ($mode eq "log") {
+		print_log_head ();
+		print_log_body ();
+		print_log_footer ();
+	}
+}
+
+# return index of file
+#*****************************************************************************
+sub find_cursor ($_)
+{
+	for (my $ind = 0; $ind <= $#svn_dir_list; $ind++) {
+		(my $flag, my $file) = split (/\|/, $svn_dir_list[$ind]);
+
+		if ($_[0] eq $file) {
+			return $ind;
+		}
+	}
+	return 0;
+}
+
+# step to ../ in repo FS (leave cursor on dir from we gone)
+#*****************************************************************************
+sub step_left ($_)
+{
+	my $prev_dir;
+	my $tmp = $_[0];
+	$_[0] =~ s/\/([^\/]*$)//; #cut latest /.*
+	if (defined $1) {
+		$prev_dir=$1 . "/";
+	} else {
+		$prev_dir="./";
+	}
+	unless ($tmp eq $_[0]) {
+		get_svn_list ($svn_repo_path . $_[0]);
+		$file_cursor = find_cursor ($prev_dir);
+		print_screen ();
+	}
+}
+
+# step up to prev line (repaint current, repain prev)
+#*****************************************************************************
+sub step_up () 
+{
+	if ($mode eq "br") {
+		unless ($file_cursor == 0) {
+			$file_cursor--;
+			if ($file_cursor < $top_file_list) {
+				$top_file_list--;
+			}
+			print_screen ();
+		}
+	} elsif ($mode eq "log"){
+		unless ($log_cursor == 0) {
+			$log_cursor--;
+			if ($log_cursor < $top_log_list) {
+				$top_log_list--;
+			}
+			print_screen ();
+		}
+	}
+}
+
+# step down to next line (repaint current, repaint next)
+#*****************************************************************************
+sub step_down () 
+{
+	if ($mode eq "br") {
+		unless (($file_cursor >= $#svn_dir_list)) {
+			if ($file_cursor >= $top_file_list + $br_act_height-1) { #if we are gone out of screen
+				$top_file_list++;	
+			}
+			$file_cursor++;
+			print_screen ();
+		}
+	} elsif ($mode eq "log"){
+		unless ($log_cursor >= $#svn_log_list) {
+			if ($log_cursor >= $top_log_list + $list_height) { #if we are gone out of screen
+				$top_log_list++;	
+			}
+			$log_cursor++;
+			print_screen ();
+		}
+	}
+}
+
+# step into dir (check that it's dir, not file)
+#*****************************************************************************
+sub step_into ($_)
+{
+	my $file = file_under_cursor ();	
+	$file =~ m/(.*)\//; 
+	if (($1) && ($1 ne ".")) {
+		$_[0] = $_[0] . "/" . $1;
+		get_svn_list ($svn_repo_path . $_[0]);
+		$file_cursor = 0;
+		print_screen ();
+	}
+}
+
+#*****************************************************************************
+sub enter_pressed ()
+{
+	if (file_under_cursor () eq "./") {
+		step_left ($svn_cur_path);
+	} else {
+		step_into ($svn_cur_path);
+	}
+}
+
+sub page_down ()
+{
+	if ($mode eq "br") {
+		if (($top_file_list + $list_height) < $#svn_dir_list) {
+			$top_file_list += $list_height;
+			$file_cursor += $list_height;
+			if ($file_cursor > $#svn_dir_list) {
+				$file_cursor = $#svn_dir_list;
+			}
+		}
+	} elsif ($mode eq "log") {
+		if (($top_log_list + $list_height) < $#svn_log_list) {
+			$top_log_list += $list_height;
+			$log_cursor += $list_height;
+			if ($log_cursor > $#svn_log_list) {
+				$log_cursor = $#svn_log_list;
+			}
+		}
+	}
+	print_screen ();
+}
+
+sub page_up ()
+{
+	if ($mode eq "br") {
+		if ($top_file_list > 0) {
+			if ($top_file_list > $list_height) {
+				$top_file_list -= $list_height;
+			} else {
+				$top_file_list = 0;
+			}
+			if ($file_cursor > $list_height) {
+				$file_cursor -= $list_height;
+			} else {
+				$file_cursor = 0;
+			}
+		}
+	} elsif ($mode eq "log"){
+		if ($top_log_list > 0) {
+			if ($top_log_list > $list_height) {
+				$top_log_list -= $list_height;
+			} else {
+				$top_log_list = 0;
+			}
+			if ($log_cursor > $list_height) {
+				$log_cursor -= $list_height;
+			} else {
+				$log_cursor = 0;
+			}
+		}
+	}
+	print_screen ();
+}
+
+sub copy ()
+{
+	$br_work = color("bold green") ."copy - paste" . color ("reset"); 
+	$br_line_0 = color("green") . "src:" . color ("reset") . $svn_cur_path . "/" . file_under_cursor ();
+	print_screen ();
+}
+
+sub cut ()
+{
+	$br_work = color("bold red") ."cut - paste (move)" . color ("reset"); 
+	$br_line_0 = color("green") . "src:" . color ("reset") . $svn_cur_path . "/" . file_under_cursor ();
+	print_screen ();
+}
+
+sub paste ()
+{
+	if (file_under_cursor() =~ m/(\.\/)/) {
+		$br_line_1 = color("green") . "dst:" . color ("reset") . $svn_cur_path;
+	}	elsif (file_under_cursor() =~ m/(.*\/)$/) {
+		$br_line_1 = color("green") . "dst:" . color ("reset") . $svn_cur_path . "/" . file_under_cursor ();
+	} else {
+		$br_line_1 = color("green") . "dst:" . color ("reset") . $svn_cur_path . "/";
+	}
+	$br_line_2 = color("red")."Enter comment (empty - cancel):".color("reset");
+	print_screen ();
+	set_screen_cursor (32, $br_header_height + $br_act_height + 4);
+	ReadMode "restore";
+	my $comment = <STDIN>;
+	ReadMode "raw";
+	if ($comment eq "\n") {
+		$br_line_1 = "";
+		$br_line_2 = "";
+	} else {
+		$br_work = color ("bold green") . "Done" . color ("reset");
+		$br_line_0 = "";
+		$br_line_1 = "";
+		$br_line_2 = "";
+	}
+	set_screen_cursor (32, $br_header_height + $br_act_height + 4);
+	clear_line ();
+	print_screen ();
+}
+
+sub makedir ()
+{
+	$br_work = color("bold green") ."make directory" . color ("reset"); 
+	$br_line_0 = color("green") . "Enter dir name (empty - cancel):" . color ("reset");
+	print_screen ();
+	set_screen_cursor (33, $br_header_height + $br_act_height + 2);
+	ReadMode "restore";
+	my $dirname = <STDIN>;
+	ReadMode "raw";
+	if ($dirname eq "\n") {
+		$br_work = "";
+		$br_line_0 = "";
+		$br_line_1 = "";
+		$br_line_2 = "";
+	} else {
+		$br_line_0 = color("green") . "creating: " . color ("reset") . $svn_cur_path . "/" . $dirname;
+		$br_line_1 = color("red")."Enter comment (empty - cancel):".color("reset");
+		print_screen ();
+		set_screen_cursor (33, $br_header_height + $br_act_height + 4);
+		ReadMode "restore";
+		my $comment = <STDIN>;
+		ReadMode "raw";
+		if ($comment eq "\n") {
+			$br_work = color ("red") . "Canceled" . color ("reset");
+		} else {
+			$br_work = color ("bold green") . "Done" . color ("reset");
+		}
+		$br_line_0 = "";
+		$br_line_1 = "";
+		$br_line_2 = "";
+	}
+	clear_line ();
+	print_screen ();
+}
+
+sub svn_delete ()
+{	
+	if (file_under_cursor() =~ m/(\.\/)/) {
+		return;
+	}
+	$br_work = color("red") . "DELETE?: " . color ("reset") . $svn_cur_path . "/" . file_under_cursor (); 
+	$br_line_1 = color("red")."Enter comment (empty - cancel):".color("reset");
+	print_screen ();
+	set_screen_cursor (33, $br_header_height + $br_act_height + 3);
+	ReadMode "restore";
+	my $comment = <STDIN>;
+	ReadMode "raw";
+	if ($comment eq "\n") {
+		$br_work = color ("red") . "Canceled" . color ("reset");
+	} else {
+		$br_work = color ("bold green") . "Done" . color ("reset");
+	}
+	$br_line_0 = "";
+	$br_line_1 = "";
+	$br_line_2 = "";
+	
+	clear_line ();
+	print_screen ();
+}
+
+sub tab_press ()
+{
+	if ($mode eq "log") {
+	#TODO switch log focus
+	}
+}
+
+#																			START
+#*****************************************************************************
+
+# find svn paths
+	&check_wc;
+	$svn_repo_path = $_[0];
+	my $svn_wc_path = $_[1];
+	$svn_cur_path = $svn_wc_path;
+
+# get svn file list
+	get_svn_list ($svn_repo_path . $svn_cur_path);
+
+
+#*****************************************************************************
+#																	KEY GRUB LOOP															 #
+#*****************************************************************************
+	print "\033[2J"; # clear screen only once
+	print_screen ();
+	ReadMode "raw";
+	my $key;
+	while () {
+		while ( not defined ($key = ReadKey )) {}
+		if ($key eq 'q') {
+			exit_;
+		} elsif ($key eq 'j') {
+			#ReadMode "restore"; # need input some text, like file name, comment...
+			system ("vim newfile.cpp");
+		} elsif ($key eq 'A') {
+			step_up ();
+		} elsif ($key eq 'B') {
+			step_down ();
+		} elsif ($key eq 'C') {
+			step_into ($svn_cur_path);
+		} elsif ($key eq 'D') {
+			step_left ($svn_cur_path);
+		} elsif ($key eq 'l') {
+			toggle_log_mode ();
+		} elsif ($key eq 'c') {
+			copy ();
+		} elsif ($key eq 'u') {
+			cut ();
+		} elsif ($key eq 'p') {
+			paste ();
+		} elsif ($key eq 'm') {
+			makedir ();
+		} elsif ($key eq 'd') {
+			svn_delete();
+		} elsif ($key eq chr 10) {						#enter key
+			enter_pressed ();
+		} elsif ($key eq chr 127) {						#backspace key
+			step_left ($svn_cur_path);
+		} elsif ($key eq  5) {								#PageUP key
+			page_up ();
+		} elsif ($key eq  6) {								#PageDown key
+			page_down ();
+		} elsif ($key eq chr 9) {								#Tab pressed
+			tab_press ();
+		} else {
+		#	print "[$key]";
+		#	print "[" . ord $key . "]";
+		}
+	}
+
