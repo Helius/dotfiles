@@ -17,6 +17,16 @@ URxvt.scrollBar_right: true
 URxvt.scrollBar: true
 URxvt.jumpScroll: true
 
+! ======= plugin setup =======
+! url yank
+URxvt.keysym.M-u: perl:mark-yank-urls:activate_mark_mode
+URxvt.underlineURLs: true
+URxvt.perl-lib: /home/eugene/.urxvt/
+URxvt.perl-ext: selection,mark-yank-urls
+URxvt.urlLauncher: firefox
+
+
+
 URxvt.foreground:#eeeeee
 URxvt.background:#101010
 URxvt.transparent: true
