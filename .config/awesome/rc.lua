@@ -120,7 +120,7 @@ log_viewer_show = "yes"
 -- set global variable log_viewer_show 
 function log_viewer_turn ()
 	if log_viewer_show == "yes" then
-		log_viewer.text = "sl"
+		log_viewer.text = "<s>SL</s>"
 		log_viewer_show = "no"
 	else
 		log_viewer.text = "SL"
