@@ -578,3 +578,4 @@ os.execute("nohup xcompmgr -cC &")
 --os.execute("nohup xrandr --output VGA1 --mode 1920x1080 --right-of HDMI1 &")
 -- start virtual mashine with XP
 -- os.execute("nohup VBoxManage startvm virtXP &")
+os.execute("finchdbus &")
