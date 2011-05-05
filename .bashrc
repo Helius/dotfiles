@@ -111,7 +111,8 @@ unset MAILCHECK         # чтобы командная оболочка не с
 # some functions
 
 function git_diff() {
-	  git diff --no-ext-diff -w "$@" | vim -R -
+	  #git diff --no-ext-diff -w "$@" | vim -R -
+	  git diff --no-ext-diff -w "$@" 
 }
 
 #---------------
