@@ -659,6 +659,7 @@ sub enter_pressed ()
 	}
 }
 
+#*****************************************************************************
 sub page_down ()
 {
 	if ($mode eq "br") {
@@ -681,6 +682,7 @@ sub page_down ()
 	print_screen ();
 }
 
+#*****************************************************************************
 sub page_up ()
 {
 	if ($mode eq "br") {
@@ -713,6 +715,7 @@ sub page_up ()
 	print_screen ();
 }
 
+#*****************************************************************************
 sub copy ()
 {
 	$br_work = color("bold green") ."copy - paste" . color ("reset"); 
@@ -720,6 +723,7 @@ sub copy ()
 	print_screen ();
 }
 
+#*****************************************************************************
 sub cut ()
 {
 	$br_work = color("bold red") ."cut - paste (move)" . color ("reset"); 
@@ -727,6 +731,7 @@ sub cut ()
 	print_screen ();
 }
 
+#*****************************************************************************
 sub paste ()
 {
 	if (file_under_cursor() =~ m/(\.\/)/) {
@@ -756,6 +761,7 @@ sub paste ()
 	print_screen ();
 }
 
+#*****************************************************************************
 sub makedir ()
 {
 	$br_work = color("bold green") ."make directory" . color ("reset"); 
@@ -791,6 +797,7 @@ sub makedir ()
 	print_screen ();
 }
 
+#*****************************************************************************
 sub svn_delete ()
 {	
 	if (file_under_cursor() =~ m/(\.\/)/) {
@@ -816,6 +823,7 @@ sub svn_delete ()
 	print_screen ();
 }
 
+#*****************************************************************************
 sub tab_press ()
 {
 	if ($mode eq "log") {
