@@ -1,11 +1,15 @@
 #! /usr/bin/perl -w
 
+# TODO
+# * add search this '/'
+# * 
+
 use strict;
 use utf8;
 use Term::ANSIColor;
 use Term::ReadKey;
 
-#												Windows subsystem
+#												Windows subsystem geometry
 #*****************************************************************************
 my $br_header_height = 8;
 my $br_footer_height = 7;
@@ -30,7 +34,8 @@ if ($log_header_height + $log_footer_height + 2 > $list_height) {
 my $log_act_height = $list_height - $log_header_height - $log_footer_height;
 
 
-
+#											Global variables
+#*****************************************************************************
 my $version = "v1.3";
 my @svn_dir_list;
 my @svn_log_list;
@@ -39,7 +44,7 @@ my $svn_cur_path = "";
 my $file_cursor = 0;
 my $log_cursor = 0;
 my $top_log_list = 0;
-my $top_file_list = 0;
+my $top_file_list = 0;				#top of file list, what is visible in active region (window)
 my $mode = "br";
 
 my $br_work = "";
@@ -59,10 +64,13 @@ sub exit_ ()
 	exit;
 }
 
+#*****************************************************************************
 sub print_usage ()
 {
-	print "svn perl browser for cli $version\n";
-	print "depends on subversion svn command line tool (you may install it: #aptitude install subversion)\n"
+	print "svn perl browser $version\n";
+	print "Depends on subversion svn command line tool (you may install it: #aptitude install subversion).\n";
+	print "Run script in work-copy directory, or run script with path to yor repo or work-copy as parametr.\n";
+	print "Enjoy!\nauthor: Helius (ghelius\@gmail.com)\n"
 }
 
 #*****************************************************************************
@@ -325,6 +333,9 @@ sub print_file_string ($_)
   print "" . color("reset") . "\n";
 }
 
+
+
+
 # set_screen_cursor (x, y); x>0, y>0
 # set_screen_cursor (x); x>0
 #*****************************************************************************
@@ -336,12 +347,14 @@ sub set_screen_cursor ($_)
 		print "\033[" . $_[0] . "G";
 	}
 }
-
+#*****************************************************************************
 sub clear_line ()
 {
 	print "\033[K\n";
 	print "\033[A";
 }
+
+
 
 #*****************************************************************************
 sub print_br_head ()
@@ -405,10 +418,10 @@ sub print_log_head ()
 
 
 # arguments:
-# 0: list_len
-# 1: list_top
-# 2: act_reg_len
-# 3: act_reg_Y0
+# 0: list_lenght	(data list lenght)
+# 1: list_top			(data list offset)
+# 2: act_reg_len	(draw windows len)
+# 3: act_reg_Y0		(draw windows offset)
 #*****************************************************************************
 sub print_scrollbar (@_)
 {
@@ -517,7 +530,7 @@ sub print_log_footer ()
 #	}
 
 	foreach (@filepath) {
-		print "$_\n";
+		#print "$_\n";
 	}
 }
 
