@@ -115,6 +115,11 @@ function git_diff() {
 	  git diff --no-ext-diff -w "$@" 
 }
 
+function svn_diff() {
+	  #git diff --no-ext-diff -w "$@" | vim -R -
+	  svn diff | vim -R -
+}
+
 #---------------
 # Prompt
 #---------------
