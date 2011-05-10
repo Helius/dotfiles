@@ -46,6 +46,7 @@ my $log_cursor = 0;
 my $top_log_list = 0;
 my $top_file_list = 0;				#top of file list, what is visible in active region (window)
 my $mode = "br";
+my @dir_stack;
 
 my $br_work = "";
 my $br_line_0 = "";
@@ -77,7 +78,7 @@ sub print_usage ()
 sub check_wc (@)
 {
 	foreach (@ARGV) {
-		if ($_ =~ m%help%) {
+		if ($_ =~ m%--help%) {
 			print_usage ();
 			exit;
 		} elsif ($_ =~m%([^-\s]*)%) {
@@ -563,25 +564,6 @@ sub find_cursor ($_)
 	return 0;
 }
 
-# step to ../ in repo FS (leave cursor on dir from we gone)
-#*****************************************************************************
-sub step_left ($_)
-{
-	my $prev_dir;
-	my $tmp = $_[0];
-	$_[0] =~ s/\/([^\/]*$)//; #cut latest /.*
-	if (defined $1) {
-		$prev_dir=$1 . "/";
-	} else {
-		$prev_dir="./";
-	}
-	unless ($tmp eq $_[0]) {
-		get_svn_list ($svn_repo_path . $_[0]);
-		$file_cursor = find_cursor ($prev_dir);
-		print_screen ();
-	}
-}
-
 # step up to prev line (repaint current, repain prev)
 #*****************************************************************************
 sub step_up () 
@@ -628,6 +610,29 @@ sub step_down ()
 	}
 }
 
+# step to ../ in repo FS (leave cursor on dir from we gone)
+#*****************************************************************************
+sub step_left ($_)
+{
+	my $prev_dir;
+	my $tmp = $_[0];
+	$_[0] =~ s/\/([^\/]*$)//; #cut latest /.*
+	if (defined $1) {
+		$prev_dir=$1 . "/";
+	} else {
+		$prev_dir="./";
+	}
+	unless ($tmp eq $_[0]) {
+		get_svn_list ($svn_repo_path . $_[0]);
+		$file_cursor = find_cursor ($prev_dir);
+		$top_file_list = pop @dir_stack;
+		unless (defined $top_file_list) {
+			$top_file_list = 0;
+		}
+		print_screen ();
+	}
+}
+
 # step into dir (check that it's dir, not file)
 #*****************************************************************************
 sub step_into ($_)
@@ -638,6 +643,8 @@ sub step_into ($_)
 		$_[0] = $_[0] . "/" . $1;
 		get_svn_list ($svn_repo_path . $_[0]);
 		$file_cursor = 0;
+		push (@dir_stack, $top_file_list);
+		$top_file_list = 0;
 		print_screen ();
 	}
 }
