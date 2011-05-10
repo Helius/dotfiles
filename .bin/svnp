@@ -77,20 +77,20 @@ sub print_usage ()
 #*****************************************************************************
 sub check_wc (@)
 {
+	my $usr_path = "";
+
 	foreach (@ARGV) {
 		if ($_ =~ m%--help%) {
 			print_usage ();
 			exit;
 		} elsif ($_ =~m%([^-\s]*)%) {
 			print "path detected: $1\n";
-			$_[0] = $1;
-			$_[1] = "";
-			return;
+			$usr_path = $1;
 		}
 	} 
 
 	my @svn_path;
-	open FILE, "<.svn/entries" or die $!;	
+	open FILE, "<" . $usr_path . ".svn/entries" or die $!;	
 
 	while (<FILE>) {
 		if ($_=~m/^(http|svn|file)(:.+)/) {
