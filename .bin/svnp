@@ -886,7 +886,7 @@ sub tab_press ()
 			page_up ();
 		} elsif ($key eq  6) {								#PageDown key
 			page_down ();
-		} elsif ($key eq chr 9) {								#Tab pressed
+		} elsif ($key eq chr 9) {							#Tab pressed
 			tab_press ();
 		} else {
 		#	print "[$key]";
