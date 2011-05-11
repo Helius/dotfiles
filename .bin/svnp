@@ -85,6 +85,7 @@ sub check_wc (@)
 			exit;
 		} elsif ($_ =~m%([^-\s]*)%) {
 			print "path detected: $1\n";
+			#if user inputed path to WC in command line, save it and concatinate with .svn/entries later
 			$usr_path = $1;
 		}
 	} 
@@ -777,22 +778,40 @@ sub makedir ()
 		$br_line_1 = "";
 		$br_line_2 = "";
 	} else {
-		$br_line_0 = color("green") . "creating: " . color ("reset") . $svn_cur_path . "/" . $dirname;
+		chomp $dirname;
+		#$br_line_0 = color("green") . "creating: " . color ("reset") . $svn_cur_path . "/" . $dirname;
+		$br_line_0 = color("green") . "Enter dir name (empty - cancel):" . color ("reset") . $dirname;
 		$br_line_1 = color("red")."Enter comment (empty - cancel):".color("reset");
 		print_screen ();
-		set_screen_cursor (33, $br_header_height + $br_act_height + 4);
+		set_screen_cursor (33, $br_header_height + $br_act_height + 3);
 		ReadMode "restore";
 		my $comment = <STDIN>;
 		ReadMode "raw";
 		if ($comment eq "\n") {
 			$br_work = color ("red") . "Canceled" . color ("reset");
 		} else {
-			$br_work = color ("bold green") . "Done" . color ("reset");
+			chomp $comment;
+			my $svn_command="svn mkdir " . $svn_repo_path . $svn_cur_path . "/" . $dirname . " -m \"" . $comment . "\"";
+			my $result = `$svn_command`;
+			$br_work = "";
+			if ($result eq "") {
+				$br_work = color ("bold green") . "Done" . color ("reset");
+			} else {
+				$br_work = $result;
+			}
+			get_svn_list ($svn_repo_path . $svn_cur_path);
 		}
 		$br_line_0 = "";
 		$br_line_1 = "";
 		$br_line_2 = "";
 	}
+	set_screen_cursor (1, $br_header_height + $br_act_height);
+	clear_line ();
+	set_screen_cursor (1, $br_header_height + $br_act_height + 1);
+	clear_line ();
+	set_screen_cursor (1, $br_header_height + $br_act_height + 2);
+	clear_line ();
+	set_screen_cursor (1, $br_header_height + $br_act_height + 3);
 	clear_line ();
 	print_screen ();
 }
