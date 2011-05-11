@@ -832,11 +832,23 @@ sub svn_delete ()
 	if ($comment eq "\n") {
 		$br_work = color ("red") . "Canceled" . color ("reset");
 	} else {
-		$br_work = color ("bold green") . "Done" . color ("reset");
+		chomp $comment;
+		my $svn_command = "svn rm " . $svn_repo_path . $svn_cur_path . "/"  . file_under_cursor () . " -m \"" .$comment. "\"";
+		#$br_work = color ("bold green") . "Done" . color ("reset");
+		$br_work = `$svn_command`;
+		get_svn_list ($svn_repo_path . $svn_cur_path);
 	}
 	$br_line_0 = "";
 	$br_line_1 = "";
 	$br_line_2 = "";
+	
+	set_screen_cursor (1, $br_header_height + $br_act_height);
+	clear_line ();
+	set_screen_cursor (1, $br_header_height + $br_act_height + 1);
+	clear_line ();
+	set_screen_cursor (1, $br_header_height + $br_act_height + 2);
+	clear_line ();
+	set_screen_cursor (1, $br_header_height + $br_act_height + 3);
 	
 	clear_line ();
 	print_screen ();
