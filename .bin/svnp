@@ -83,6 +83,9 @@ sub check_wc (@)
 		if ($_ =~ m%--help%) {
 			print_usage ();
 			exit;
+		} elsif ($_ =~m%--debug%) {
+			get_svn_list (".");
+			exit;
 		} elsif ($_ =~m%([^-\s]*)%) {
 			print "path detected: $1\n";
 			#if user inputed path to WC in command line, save it and concatinate with .svn/entries later
@@ -127,10 +130,13 @@ sub get_svn_list ($_)
 	 		my $size = $3;
 	 		my $tail = $4;
 
-	 		$tail =~ s/(.*?)([-\w.\/]+)$/$1/;
-	 		my $file = $2;
+	 		$tail =~ m/(.*?)\s(.*)?\s(.*?)\s(.*)$/i;
+			my $mon = $1;
+			my $day = $2;
+			my $time = $3;
+	 		my $file = $4;
 	 		
-			my $svn_dir_entry = "   |" . $file . "|" . $size . "|" . $rev . "|" . $author . "|" . $tail;
+			my $svn_dir_entry = "   |" . $file . "|" . $size . "|" . $rev . "|" . $author . "|" . $mon . "|" . $day . "|" . $time;
 			push (@svn_dir_list, $svn_dir_entry);
 	}
 }
@@ -286,7 +292,7 @@ sub print_file_string ($_)
 #  my $dir_nml = "\033[0;30m";
    my($dir_on) = color ("bold blue");
 
-	(my $flag, my $file, my $size, my $rev, my $author, my $tail) = split (/\|/, $svn_dir_list[$_[0]]);
+	(my $flag, my $file, my $size, my $rev, my $author, my $mon, my $day, my $time) = split (/\|/, $svn_dir_list[$_[0]]);
  
    print $flag;
 
@@ -316,20 +322,7 @@ sub print_file_string ($_)
          print " ";
    }
 
-	my $datetime = "                                  ";
-	$tail =~m/(.*)\s+([0-9]+)\s+([:0-9]+)/i;	
-	if ((defined $3)&&(length($3)>4)) {
-		substr ($datetime, 0, 8) = $3;
-	}
-	if (defined $2) {
-		substr ($datetime, 8, 2) = $2;
-	}
-	if (defined $1) {
-		substr ($datetime, 11, 10) = $1;
-	}
-	if ((defined $3)&&(length($3)<5)) {
-		substr ($datetime, 21, 10) = $3;
-	}
+	my $datetime = "          $time  $day $mon";
 
 	print $datetime;
   print "" . color("reset") . "\n";
@@ -339,7 +332,7 @@ sub print_file_string ($_)
 
 
 # set_screen_cursor (x, y); x>0, y>0
-# set_screen_cursor (x); x>0
+# set_screen_cursor (x); x>0 (y=1)
 #*****************************************************************************
 sub set_screen_cursor ($_)
 {
@@ -772,14 +765,18 @@ sub makedir ()
 	ReadMode "restore";
 	my $dirname = <STDIN>;
 	ReadMode "raw";
-	if ($dirname eq "\n") {
+	chomp $dirname;
+	if ($dirname eq "") {
 		$br_work = "";
 		$br_line_0 = "";
 		$br_line_1 = "";
 		$br_line_2 = "";
-	} else {
-		chomp $dirname;
-		#$br_line_0 = color("green") . "creating: " . color ("reset") . $svn_cur_path . "/" . $dirname;
+	} elsif ($dirname =~m/[\s]/ ) {
+		$br_work = "It's not good practice to use white space and non-english chars in filename! try again...";
+		$br_line_0 = "";
+		$br_line_1 = "";
+		$br_line_2 = "";
+	}	else {
 		$br_line_0 = color("green") . "Enter dir name (empty - cancel):" . color ("reset") . $dirname;
 		$br_line_1 = color("red")."Enter comment (empty - cancel):".color("reset");
 		print_screen ();
@@ -792,13 +789,8 @@ sub makedir ()
 		} else {
 			chomp $comment;
 			my $svn_command="svn mkdir " . $svn_repo_path . $svn_cur_path . "/" . $dirname . " -m \"" . $comment . "\"";
-			my $result = `$svn_command`;
-			$br_work = "";
-			if ($result eq "") {
-				$br_work = color ("bold green") . "Done" . color ("reset");
-			} else {
-				$br_work = $result;
-			}
+			# execute svn command
+			my $br_work = `$svn_command`;
 			get_svn_list ($svn_repo_path . $svn_cur_path);
 		}
 		$br_line_0 = "";
@@ -806,14 +798,17 @@ sub makedir ()
 		$br_line_2 = "";
 	}
 	set_screen_cursor (1, $br_header_height + $br_act_height);
-	clear_line ();
-	set_screen_cursor (1, $br_header_height + $br_act_height + 1);
-	clear_line ();
-	set_screen_cursor (1, $br_header_height + $br_act_height + 2);
-	clear_line ();
-	set_screen_cursor (1, $br_header_height + $br_act_height + 3);
-	clear_line ();
-	print_screen ();
+	
+	# comment it for svn message leaves on screan! wery usable, but donot clear user input, after command execute
+
+	#clear_line ();
+	#set_screen_cursor (1, $br_header_height + $br_act_height + 1);
+	#clear_line ();
+	#set_screen_cursor (1, $br_header_height + $br_act_height + 2);
+	#clear_line ();
+	#set_screen_cursor (1, $br_header_height + $br_act_height + 3);
+	#clear_line ();
+	#print_screen ();
 }
 
 #*****************************************************************************
