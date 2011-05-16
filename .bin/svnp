@@ -8,6 +8,8 @@ use utf8;
 use Term::ANSIColor;
 use Term::ReadKey;
 binmode STDOUT, ":utf8";
+binmode STDIN, ":utf8";
+binmode STDERR, ":utf8";
 
 #												Windows subsystem geometry
 #*****************************************************************************
@@ -167,7 +169,7 @@ sub get_svn_log ($_)
 	my $logentry;
 	my $in_entry = 0;
 	my @tmp_log_list;
-	my @result = `svn log --xml --stop-on-copy -v $_[0]`;
+	my @result = `svn log --xml --stop-on-copy -v \"$_[0]\"`;
 	chomp @result;
 
 	foreach (@result) {
@@ -796,6 +798,7 @@ sub makedir ()
 			my $svn_command="svn mkdir \"" . $svn_repo_path . $svn_cur_path . "/" . $dirname . "\" -m \"" . $comment . "\" 2>&1";
 			# execute svn command
 			$br_work = `$svn_command`;
+			utf8::decode($br_work);
 			get_svn_list ($svn_repo_path . $svn_cur_path);
 		}
 		$br_line_0 = "";
