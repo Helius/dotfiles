@@ -140,7 +140,6 @@ sub get_svn_list ($_)
 			my $day = $2;
 			my $time = $3;
 	 		my $file = $4;
-			#print "len:", length $file,": ",$file, "\n";
 
 			#print "mon[$mon] day[$day] time[$time] name[$file]\n\n";
 	 		
@@ -266,7 +265,7 @@ sub print_log_string ($_)
 				print " ";
 	}
 	$msg =~ s/\n//g; # remove carriage return
-	$msg = substr ($msg, 0, $list_width - 6 - 15 - 22 ); #TODO: calc it!
+	$msg = substr ($msg, 0, $list_width - 6 - 15 - 40 ); #TODO: calc it!
 	print "$msg";
 	
 	print color ("reset") . "\n";
@@ -311,23 +310,26 @@ sub print_file_string ($_)
 	}
 
 	no bytes;
-	my $space = 30 - length ($file);
+	my $space = $list_width - 68 - length ($file);
 	$file =~ s/(.*)\/$/$dir_on$1\//;
 
 	print "$file";
 	for (my $digit = 0; $digit <=$space; $digit++) {
 			 print " ";
 	}
+
 	$space = 7 - length($size);
+	for (my $digit = 0; $digit <=$space; $digit++) {
+			 print " ";
+	}
 	print "$size";
-	for (my $digit = 0; $digit <=$space; $digit++) {
-			 print " ";
-	}
+
 	$space = 6 - length($rev);
-	print "$rev";
 	for (my $digit = 0; $digit <=$space; $digit++) {
 			 print " ";
 	}
+	print "$rev    ";
+
 	$space = 15 - length($author);
 	print "$author";
 	for (my $digit = 0; $digit <=$space; $digit++) {
@@ -391,7 +393,7 @@ sub print_br_head ()
 	}
 	print "\n";
 	clear_line ();
-	print  color ("bold") . "     name                         size    rev    author           date time\n"; 
+	print  color ("bold") . "     name                         size    rev    author                      date time\n"; 
 	clear_line ();
 	print color("reset") . "\n"
 }
@@ -825,7 +827,7 @@ sub svn_delete ()
 	}
 	$br_work = color("red") . "DELETE?: " . color ("reset") . $svn_cur_path . "/" . file_under_cursor (); 
 	$br_line_1 = color("red")."Enter comment (empty - cancel):".color("reset");
-	print_screen ();
+	print_br_footer ();
 	set_screen_cursor (33, $br_header_height + $br_act_height + 3);
 	ReadMode "restore";
 	my $comment = <STDIN>;
@@ -836,6 +838,7 @@ sub svn_delete ()
 		chomp $comment;
 		my $svn_command = "svn rm \"" . $svn_repo_path . $svn_cur_path . "/"  . file_under_cursor () . "\" -m \"" .$comment. "\" 2>&1";
 		$br_work = `$svn_command`;
+		utf8::decode($br_work);
 		get_svn_list ($svn_repo_path . $svn_cur_path);
 	}
 	$br_line_0 = "";
