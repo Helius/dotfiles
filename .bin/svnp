@@ -3,11 +3,11 @@
 # TODO
 # * add search this '/'
 # * 
-
 use strict;
 use utf8;
 use Term::ANSIColor;
 use Term::ReadKey;
+binmode STDOUT, ":utf8";
 
 #												Windows subsystem geometry
 #*****************************************************************************
@@ -119,22 +119,28 @@ sub check_wc (@)
 sub get_svn_list ($_)
 {
 	$#svn_dir_list = -1;
- 
- 	my @result = `svn list -v $_[0]`;
+	 
+ 	my @result = `svn list -v "$_[0]"`;
  	chomp (@result);
  	foreach (@result) {
 
+			utf8::decode($_);
 	 		$_ =~ m/\s([0-9]+)\s([-.\wа-яА-Я]*)\s+([0-9]+|)\s+(.*)/;
 	 		my $rev = $1;
 	 		my $author = $2;
 	 		my $size = $3;
 	 		my $tail = $4;
+			
+			#print "$tail\n";
 
-	 		$tail =~ m/(.*?)\s(.*)?\s(.*?)\s(.*)$/i;
+	 		$tail =~ m/(\S*?)\s(\S*)?\s(\S*?)\s(.*)$/i;
 			my $mon = $1;
 			my $day = $2;
 			my $time = $3;
 	 		my $file = $4;
+			#print "len:", length $file,": ",$file, "\n";
+
+			#print "mon[$mon] day[$day] time[$time] name[$file]\n\n";
 	 		
 			my $svn_dir_entry = "   |" . $file . "|" . $size . "|" . $rev . "|" . $author . "|" . $mon . "|" . $day . "|" . $time;
 			push (@svn_dir_list, $svn_dir_entry);
@@ -181,6 +187,7 @@ sub get_svn_log ($_)
 	#print "@tmp_log_list";
 
 	foreach (@tmp_log_list) {
+		utf8::decode($_);
 		$_ =~ s/revision=\"([0-9]+)\"//;
 		my $rev = $1;
 
@@ -195,18 +202,18 @@ sub get_svn_log ($_)
 		
 		$_ =~ s/<paths>(.*)<\/paths>//;
 		my $paths = $1;
-		my $svnflags = "    ";
+		my $svnflags = "--- ";
 		my $files ="";
 		while ($paths =~ m/<path.*?action="(.)".*?>(.*?)<\/path>/igm) {
 			$files = $files . $1 . " " . $2 . "}";
 			if ($1 eq "M") {
-				substr($svnflags, 1,1) = "M";
+				substr($svnflags, 1,1) = "m";
 			} elsif ($1 eq "A") {
-				substr($svnflags, 0,1) = "A";
+				substr($svnflags, 0,1) = "a";
 			} elsif ($1 eq "D") {
-				substr($svnflags, 2,1) = "D";
+				substr($svnflags, 2,1) = "d";
 			} elsif ($1 eq "R") {
-				substr($svnflags, 3,1) = "R";
+				substr($svnflags, 3,1) = "r";
 			}
 		}
 
@@ -277,50 +284,53 @@ sub toggle_log_mode ()
 	print_screen ();
 }
 
+
 # print file (dir) string from svn_dir_list, number put in parameters
 # split each field of line to collumn
 #*****************************************************************************
 sub print_file_string ($_)
 {
+	
+	use utf8;
+
 	my $str = "";
 
 	if ($_[0] > $#svn_dir_list) {
 		print "\n";
 		return;
 	}
-#  my $dir_on ="\033[1;34m";
-#  my $dir_nml = "\033[0;30m";
-   my($dir_on) = color ("bold blue");
-
+   
+	my($dir_on) = color ("bold blue");
 	(my $flag, my $file, my $size, my $rev, my $author, my $mon, my $day, my $time) = split (/\|/, $svn_dir_list[$_[0]]);
- 
-   print $flag;
+  print $flag;
+	
+  if ($_[0] == $file_cursor) {
+	 print "" . color ("reverse") . "";
+	}
 
-   if ($_[0] == $file_cursor) {
-     print "" . color ("reverse") . "";
-   }
-   my $space = 30 - length($file);
-   $file =~ s/(.*)\/$/$dir_on$1\//;
+	no bytes;
+	my $space = 30 - length ($file);
+	$file =~ s/(.*)\/$/$dir_on$1\//;
 
-   print "$file";
-   for (my $digit = 0; $digit <=$space; $digit++) {
-         print " ";
-   }
-   $space = 7 - length($size);
-   print "$size";
-   for (my $digit = 0; $digit <=$space; $digit++) {
-         print " ";
-   }
-   $space = 6 - length($rev);
-   print "$rev";
-   for (my $digit = 0; $digit <=$space; $digit++) {
-         print " ";
-   }
-   $space = 15 - length($author);
-   print "$author";
-   for (my $digit = 0; $digit <=$space; $digit++) {
-         print " ";
-   }
+	print "$file";
+	for (my $digit = 0; $digit <=$space; $digit++) {
+			 print " ";
+	}
+	$space = 7 - length($size);
+	print "$size";
+	for (my $digit = 0; $digit <=$space; $digit++) {
+			 print " ";
+	}
+	$space = 6 - length($rev);
+	print "$rev";
+	for (my $digit = 0; $digit <=$space; $digit++) {
+			 print " ";
+	}
+	$space = 15 - length($author);
+	print "$author";
+	for (my $digit = 0; $digit <=$space; $digit++) {
+			 print " ";
+	}
 
 	my $datetime = "          $time  $day $mon";
 
@@ -771,11 +781,6 @@ sub makedir ()
 		$br_line_0 = "";
 		$br_line_1 = "";
 		$br_line_2 = "";
-	} elsif ($dirname =~m/[\s]/ ) {
-		$br_work = "It's not good practice to use white space and non-english chars in filename! try again...";
-		$br_line_0 = "";
-		$br_line_1 = "";
-		$br_line_2 = "";
 	}	else {
 		$br_line_0 = color("green") . "Enter dir name (empty - cancel):" . color ("reset") . $dirname;
 		$br_line_1 = color("red")."Enter comment (empty - cancel):".color("reset");
@@ -788,9 +793,9 @@ sub makedir ()
 			$br_work = color ("red") . "Canceled" . color ("reset");
 		} else {
 			chomp $comment;
-			my $svn_command="svn mkdir " . $svn_repo_path . $svn_cur_path . "/" . $dirname . " -m \"" . $comment . "\"";
+			my $svn_command="svn mkdir \"" . $svn_repo_path . $svn_cur_path . "/" . $dirname . "\" -m \"" . $comment . "\" 2>&1";
 			# execute svn command
-			my $br_work = `$svn_command`;
+			$br_work = `$svn_command`;
 			get_svn_list ($svn_repo_path . $svn_cur_path);
 		}
 		$br_line_0 = "";
@@ -798,17 +803,15 @@ sub makedir ()
 		$br_line_2 = "";
 	}
 	set_screen_cursor (1, $br_header_height + $br_act_height);
-	
-	# comment it for svn message leaves on screan! wery usable, but donot clear user input, after command execute
+	clear_line ();
+	set_screen_cursor (1, $br_header_height + $br_act_height + 1);
+	clear_line ();
+	set_screen_cursor (1, $br_header_height + $br_act_height + 2);
+	clear_line ();
+	set_screen_cursor (1, $br_header_height + $br_act_height + 3);
+	clear_line ();
 
-	#clear_line ();
-	#set_screen_cursor (1, $br_header_height + $br_act_height + 1);
-	#clear_line ();
-	#set_screen_cursor (1, $br_header_height + $br_act_height + 2);
-	#clear_line ();
-	#set_screen_cursor (1, $br_header_height + $br_act_height + 3);
-	#clear_line ();
-	#print_screen ();
+	print_screen ();
 }
 
 #*****************************************************************************
@@ -828,8 +831,7 @@ sub svn_delete ()
 		$br_work = color ("red") . "Canceled" . color ("reset");
 	} else {
 		chomp $comment;
-		my $svn_command = "svn rm " . $svn_repo_path . $svn_cur_path . "/"  . file_under_cursor () . " -m \"" .$comment. "\"";
-		#$br_work = color ("bold green") . "Done" . color ("reset");
+		my $svn_command = "svn rm \"" . $svn_repo_path . $svn_cur_path . "/"  . file_under_cursor () . "\" -m \"" .$comment. "\" 2>&1";
 		$br_work = `$svn_command`;
 		get_svn_list ($svn_repo_path . $svn_cur_path);
 	}
@@ -844,8 +846,8 @@ sub svn_delete ()
 	set_screen_cursor (1, $br_header_height + $br_act_height + 2);
 	clear_line ();
 	set_screen_cursor (1, $br_header_height + $br_act_height + 3);
-	
 	clear_line ();
+
 	print_screen ();
 }
 
