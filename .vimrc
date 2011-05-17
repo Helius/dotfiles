@@ -57,7 +57,7 @@ set backspace=2 "разрешить backspace в режиме вставки
 let g:syntastic_enable_signs=1
 
 " ========== ОПЦИИ ОТОБРАЖЕНИЯ ТЕКСТА  =============
-set t_Co=16				"включить дополнительные цвета в терминале (полезно для команды TOhtml (t_Co=256), иначе цвета html кода нереально яркие и нечитабельные на белом фоне)
+set t_Co=16				"включить дополнительные цвета в терминале (полезно для команды TOhtml (t_Co=256), иначе цвета html кода нереально яркие и кислотные)
 
 " цветовая схема
 set background=dark
@@ -66,7 +66,7 @@ highlight Comment ctermfg=blue
 highlight PreProc ctermfg=green
 highlight String ctermfg=darkmagenta
 highlight Conditional ctermfg=yellow
-highlight LineNr ctermfg=darkyellow
+highlight LineNr ctermfg=240
 highlight Number ctermfg=darkred
 highlight Constant ctermfg=magenta 
 highlight cFormat ctermfg=magenta
