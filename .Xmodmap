@@ -1,0 +1,7 @@
+keycode 81 = Prior
+keycode 89 = Next
+keycode 79 = Home
+keycode 87 = End
+keycode 82 = Delete
+keycode 104 = Return
+!keycode KP_Subtract = Delete
