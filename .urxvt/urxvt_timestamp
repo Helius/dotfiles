@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+
+# Author:  Eugene Samoylov <ghelius@gmail.com>
+use Time::HiRes;
+use strict;
+use warnings;
+use utf8;
+
+my $show_time_stap = 0;
+
+sub on_user_command {
+    my ($term, $cmd) = @_;
+
+		if ($cmd eq 'urxvt_timestamp:activate_mark_mode') {
+			if ($show_time_stap == 0) {
+				$show_time_stap = 1;
+			}	else {
+				$show_time_stap = 0;
+			}
+		}
+
+    ()
+}
+
+sub on_add_lines {
+	if ($show_time_stap == 0) {
+		return 0;
+	}
+	my ($term, $line) = @_;
+	if ($line =~m /[\n]/g) {
+#		chomp $line;
+#		$line =~ s/\n//g; 
+#		$line =~ s/\r//g; 
+#		(my $seconds, my $fraction) = Time::HiRes::gettimeofday();
+#		my $timestamp = "[". $seconds . ":" . $fraction . "]";
+#		$term->scr_add_lines ("\n\r$timestamp\t". $line );
+		(my $seconds, my $fraction) = Time::HiRes::gettimeofday();
+		my $timestamp = "[". $seconds . ":" . $fraction . "]\t";
+		$line =~s/^(\s*)/$1$timestamp/;
+		$term->scr_add_lines ( $line );
+		return 1;
+	}
+	return 0;
+}
+
