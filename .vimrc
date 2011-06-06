@@ -57,12 +57,15 @@ set backspace=2 "разрешить backspace в режиме вставки
 let g:syntastic_enable_signs=1
 
 " ========== ОПЦИИ ОТОБРАЖЕНИЯ ТЕКСТА  =============
-set t_Co=16				"включить дополнительные цвета в терминале (полезно для команды TOhtml (t_Co=256), иначе цвета html кода нереально яркие и кислотные)
+set t_Co=256			"включить дополнительные цвета в терминале (полезно для команды TOhtml (t_Co=256), иначе цвета html кода нереально яркие и кислотные)
 
 " цветовая схема
+syntax on
+colo default
+
 set background=dark
-highlight Statement ctermfg=darkyellow
-highlight Comment ctermfg=blue
+highlight Statement ctermfg=yellow
+highlight Comment ctermfg=darkblue
 highlight PreProc ctermfg=green
 highlight String ctermfg=darkmagenta
 highlight Conditional ctermfg=yellow
@@ -73,6 +76,8 @@ highlight cFormat ctermfg=magenta
 highlight cSpecial ctermfg=magenta
 highlight cType ctermfg=darkgreen
 highlight Structure ctermfg=darkgreen
+highlight Function ctermfg=lightblue
+highlight Macro ctermfg=green
 
 
 
@@ -116,19 +121,6 @@ set sessionoptions=buffers,curdir,folds,tabpages,winsize,winpos,resize,globals
 autocmd! bufwritepost .vimrc source $MYVIMRC "применять .vimrc налету!!! :D
 
 "=================== Действия для разных типов файлов =
-function! CCodeEdit()
-	" Вводим одну скобку, а получаем две и курсор между ними
-	" Как можно догадаться <LEFT> - это переход в лево на одну позицию
-"	imap { {}<LEFT>
-"	" Если успеваем ввести две, то курсор находится за скобками
-"	imap {} {}
-"	imap ( ()<LEFT>
-"	imap () ()
-"	imap [ []<LEFT>
-"	imap [] []
-"	imap < <><LEFT>
-"	imap <> <>
-endfunction
 
 autocmd FileType c call CCodeEdit()
 
