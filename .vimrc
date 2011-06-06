@@ -122,7 +122,7 @@ autocmd! bufwritepost .vimrc source $MYVIMRC "применять .vimrc нале
 
 "=================== Действия для разных типов файлов =
 
-autocmd FileType c call CCodeEdit()
+"autocmd FileType c call CCodeEdit()
 
 " ================= ПРИВЯЗКА КНОПОК ===================
 " < & > - делаем отступы для блоков
