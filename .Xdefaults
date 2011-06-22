@@ -19,7 +19,7 @@ URxvt.jumpScroll: true
 
 ! ======= plugin setup =======
 URxvt.perl-lib: /home/eugene/.urxvt/
-URxvt.perl-ext: selection,mark-yank-urls, urxvt_timestamp
+URxvt.perl-ext: selection,mark-yank-urls,urxvt_timestamp
 ! url yank
 URxvt.keysym.M-u: perl:mark-yank-urls:activate_mark_mode
 URxvt.underlineURLs: true
