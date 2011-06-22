@@ -82,7 +82,10 @@ mylauncher = awful.widget.launcher({ image = image(beautiful.awesome_icon),
 -- Create a textclock widget
 mytextclock = awful.widget.textclock({ align = "right" })
 
----------- helius: create and place dropbox icon ---------
+
+----------------------- Helius widgets -------------------------
+
+---------- dropbox icon ---------
 db_icon = widget({ type = "imagebox" })
 db_icon.image = image(awful.util.getdir("config") .. "/icons/dropbox/3/x.png")
 db_icon:add_signal("mouse::enter", function ()
@@ -105,20 +108,19 @@ db_icon:add_signal("mouse::enter", function ()
 							border_width = 0
 					})
 			 end)
--------------------- helius: end ---------------------------
 
 
--------- helius: create text box with button, turn on/off message from syslog -------
+-------- turn on/off message from syslog -------
 log_viewer = widget({ type = "textbox" })
 log_viewer.text = "SL"
 log_viewer:buttons(awful.util.table.join(
-	awful.button({ }, 1, function ()  log_viewer_turn () end)
+	awful.button({ }, 1, function ()  log_viewer_toggle () end)
 ))
 log_viewer_show = "yes"
 
 -- log_viewer button click handler
 -- set global variable log_viewer_show 
-function log_viewer_turn ()
+function log_viewer_toggle ()
 	if log_viewer_show == "yes" then
 		log_viewer.text = "<s>SL</s>"
 		log_viewer_show = "no"
@@ -127,15 +129,67 @@ function log_viewer_turn ()
 		log_viewer_show = "yes"
 	end
 end
+
+--------- cpu load graph ---------------
+
+cpugraph = awful.widget.graph()
+cpugraph:set_width(25)
+cpugraph:set_background_color('#0e0e0e')
+cpugraph:set_color('#FF5656')
+cpugraph:set_gradient_colors({ '#FF5656', '#666666', '#444444' })
+cpugraph:set_max_value (100)
+cpugraph:set_gradient_angle (0)
+
+-------- volume control widget -----------
+
+cardid  = 0
+channel = "Master"
+
+function volume (mode, widget)
+if mode == "update" then
+						local fd = io.popen("amixer -c " .. cardid .. " -- sget " .. channel)
+						local status = fd:read("*all")
+						fd:close()
+	
+	local volume = string.match(status, "(%d?%d?%d)%%")
+	volume = string.format("% 3d", volume)
+
+	status = string.match(status, "%[(o[^%]]*)%]")
+
+	if string.find(status, "on", 1, true) then
+		volume = volume .. "% "
+	else
+		volume = volume .. "M "
+	end
+	widget.text = volume
+
+elseif mode == "up" then
+	io.popen("amixer -q -c " .. cardid .. " sset " .. channel .. " 5%+"):read("*all")
+	volume("update", widget)
+elseif mode == "down" then
+	io.popen("amixer -q -c " .. cardid .. " sset " .. channel .. " 5%-"):read("*all")
+	volume("update", widget)
+else
+	io.popen("amixer -c " .. cardid .. " sset " .. channel .. " toggle"):read("*all")
+	volume("update", widget)
+end
+end
+
+tb_volume = widget({ type = "textbox", name = "tb_volume", align = "center" })
+tb_volume:buttons(awful.util.table.join(
+		awful.button({ }, 4, function () volume("up", tb_volume) end),
+		awful.button({ }, 5, function () volume("down", tb_volume) end),
+		awful.button({ }, 1, function () volume("mute", tb_volume) end)
+	 ))
+volume("update", tb_volume)
+
 -------------------- helius: end ---------------------------
 
-mygraph = awful.widget.graph()
-mygraph:set_width(25)
-mygraph:set_background_color('#0e0e0e')
-mygraph:set_color('#FF5656')
-mygraph:set_gradient_colors({ '#FF5656', '#666666', '#444444' })
-mygraph:set_max_value (100)
-mygraph:set_gradient_angle (0)
+
+
+
+
+
 
 -- Create a systray
 mysystray = widget({ type = "systray" })
@@ -210,9 +264,11 @@ for s = 1, screen.count() do
         },
         mylayoutbox[s],
         mytextclock,
-				mygraph.widget,
+				cpugraph.widget,
 				db_icon,
 				log_viewer,
+				--volumegraph.widget,
+				tb_volume,
         s == 1 and mysystray or nil,
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
@@ -555,7 +611,7 @@ lv_timer:start()
        end
        --return s
 			 --naughty.notify { text = s }
-			 mygraph:add_value(s)
+			 cpugraph:add_value(s)
    end
 
 
