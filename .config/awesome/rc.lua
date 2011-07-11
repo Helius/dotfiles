@@ -112,7 +112,7 @@ db_icon:add_signal("mouse::enter", function ()
 
 -------- turn on/off message from syslog -------
 log_viewer = widget({ type = "textbox" })
-log_viewer.text = "SL"
+log_viewer.text = "[SL]"
 log_viewer:buttons(awful.util.table.join(
 	awful.button({ }, 1, function ()  log_viewer_toggle () end)
 ))
@@ -122,10 +122,10 @@ log_viewer_show = "yes"
 -- set global variable log_viewer_show 
 function log_viewer_toggle ()
 	if log_viewer_show == "yes" then
-		log_viewer.text = "<s>SL</s>"
+		log_viewer.text = "[<s>SL</s>]"
 		log_viewer_show = "no"
 	else
-		log_viewer.text = "SL"
+		log_viewer.text = "[SL]"
 		log_viewer_show = "yes"
 	end
 end
@@ -219,14 +219,14 @@ if mode == "update" then
 						fd:close()
 	
 	local volume = string.match(status, "(%d?%d?%d)%%")
-	volume = string.format("% 3d", volume)
+	volume = string.format("%3d", volume)
 
 	status = string.match(status, "%[(o[^%]]*)%]")
 
 	if string.find(status, "on", 1, true) then
-		volume = volume .. "% "
+		volume = " [" .. volume .. "%] "
 	else
-		volume = volume .. "M "
+		volume = " [" .. volume .. "M] "
 	end
 	widget.text = volume
 
