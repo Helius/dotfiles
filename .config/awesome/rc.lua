@@ -112,7 +112,7 @@ db_icon:add_signal("mouse::enter", function ()
 
 -------- turn on/off message from syslog -------
 log_viewer = widget({ type = "textbox" })
-log_viewer.text = "SL"
+log_viewer.text = "[SL]"
 log_viewer:buttons(awful.util.table.join(
 	awful.button({ }, 1, function ()  log_viewer_toggle () end)
 ))
@@ -122,16 +122,15 @@ log_viewer_show = "yes"
 -- set global variable log_viewer_show 
 function log_viewer_toggle ()
 	if log_viewer_show == "yes" then
-		log_viewer.text = "<s>SL</s>"
+		log_viewer.text = "[<s>SL</s>]"
 		log_viewer_show = "no"
 	else
-		log_viewer.text = "SL"
+		log_viewer.text = "[SL]"
 		log_viewer_show = "yes"
 	end
 end
 
 --------- cpu load graph ---------------
-
 cpugraph = awful.widget.graph()
 cpugraph:set_width(25)
 cpugraph:set_background_color('#0e0e0e')
@@ -140,8 +139,76 @@ cpugraph:set_gradient_colors({ '#FF5656', '#666666', '#444444' })
 cpugraph:set_max_value (100)
 cpugraph:set_gradient_angle (0)
 
--------- volume control widget -----------
+jiffies = {}
+ function activecpu()
+		 local s = ""
+		 for line in io.lines("/proc/stat") do
+				 local cpu, newjiffies = string.match(line, "(cpu\ )\ +(%d+)")
+				 if cpu and newjiffies then
+						 if not jiffies[cpu] then
+								 jiffies[cpu] = newjiffies
+						 end
+						 --The string.format prevents your task list from jumping around 
+						 --when CPU usage goes above/below 10%
+						 --s = string.format("0.%02d", (newjiffies-jiffies[cpu])) 
+						 s = string.format("%d", ((newjiffies-jiffies[cpu]))) 
+						 jiffies[cpu] = newjiffies
+				 end
+		 end
+		 --return s
+		 --naughty.notify { text = s }
+		 cpugraph:add_value(s)
+ end
 
+
+cpu_timer = timer({ timeout = 1 })
+cpu_timer:add_signal("timeout", function() activecpu () end)
+cpu_timer:start()
+
+
+--------- battery status -----------------
+tw_battery = widget({ type = "textbox", name = "tw_battery", align = "center" })
+tw_battery:buttons(awful.util.table.join(
+	awful.button({ }, 1, function () battery_show_all () end)
+))
+	-- on click show all status
+function battery_show_all ()
+	local fd = io.popen("acpitool -B ")
+	local status = fd:read("*all")
+	fd:close()
+	naughty.notify ({text=status, timeout=10})
+end
+
+	-- timers handler, periodically check status and set it to text widget
+function battery_check ()
+	local fd = io.popen("acpitool -B ")
+	local status = fd:read("*all")
+	fd:close()
+	local mode = string.match(status, "Charging state%s+:%s+(%l*)%s")
+	local time = string.match(status, "Remaining capacity.*(%d+:%d+:%d+)")
+	if string.find (time, ":") then
+		if string.find (mode, "discharging") then
+			tw_battery.text = '[<span color="red">' .. time .. '</span>]'
+			local hh, mm, ss = string.match (time, "(%d+):(%d+):(%d+)")
+				
+			if hh == "0" and mm < "10" then
+				naughty.notify ({ hover_timeout = 0.2, timeout = 0, title = '<span color="red">Attention!</span>', text = 'battery time is ' .. time, font="terminus-12"})
+				
+			end
+			
+		else 
+			tw_battery.text = '[<span color="green">' .. time .. '</span>]'
+		end
+	else
+		tw_battery.text = ""
+	end
+end
+	-- timer for battery check
+battery_timer = timer({ timeout = 30 })
+battery_timer:add_signal("timeout", function() battery_check () end)
+battery_timer:start()
+
+-------- volume control widget -----------
 cardid  = 0
 channel = "Master"
 
@@ -152,14 +219,14 @@ if mode == "update" then
 						fd:close()
 	
 	local volume = string.match(status, "(%d?%d?%d)%%")
-	--volume = string.format("% 3d", volume)
+	--volume = string.format("%3d", volume)
 
 	status = string.match(status, "%[(o[^%]]*)%]")
 
 	if string.find(status, "on", 1, true) then
-		volume = volume .. "% "
+		volume = " [" .. volume .. "%] "
 	else
-		volume = volume .. "M "
+		volume = " [" .. volume .. "M] "
 	end
 	widget.text = volume
 
@@ -267,8 +334,8 @@ for s = 1, screen.count() do
 				cpugraph.widget,
 				db_icon,
 				log_viewer,
-				--volumegraph.widget,
 				tb_volume,
+				tw_battery,
         s == 1 and mysystray or nil,
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
@@ -586,38 +653,6 @@ lv_timer:add_signal("timeout", function() lv_timer_hook () end)
 lv_timer:start()
 
     --------------------- CPU graph ---------------------
-
---function cpu_timer_hook ()
---	local f = io.open ("/proc/stat")
---	local l = f:read ("*a")
---	f:close ()
---end
-
-	jiffies = {}
-   function activecpu()
-       local s = ""
-       for line in io.lines("/proc/stat") do
-           local cpu, newjiffies = string.match(line, "(cpu\ )\ +(%d+)")
-           if cpu and newjiffies then
-               if not jiffies[cpu] then
-                   jiffies[cpu] = newjiffies
-               end
-               --The string.format prevents your task list from jumping around 
-               --when CPU usage goes above/below 10%
-               --s = string.format("0.%02d", (newjiffies-jiffies[cpu])) 
-               s = string.format("%d", ((newjiffies-jiffies[cpu]))) 
-               jiffies[cpu] = newjiffies
-           end
-       end
-       --return s
-			 --naughty.notify { text = s }
-			 cpugraph:add_value(s)
-   end
-
-
-cpu_timer = timer({ timeout = 1 })
-cpu_timer:add_signal("timeout", function() activecpu () end)
-cpu_timer:start()
 
 
 ------------------------- Helius end --------------------------------------
