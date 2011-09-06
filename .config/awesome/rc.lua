@@ -156,8 +156,9 @@ jiffies = {}
 				 end
 		 end
 		 --return s
-		 --naughty.notify { text = s }
-		 cpugraph:add_value(s)
+		 --local sd = string.format ('%s', s/4)
+		 --naughty.notify { text = sd }
+		 cpugraph:add_value(s/4)
  end
 
 
