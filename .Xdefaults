@@ -45,6 +45,7 @@ URxvt.transparent: true
 
 *background: rgb:1a/1a/1a
 *foreground: rgb:aa/aa/aa
+
 !black
 *color0:     rgb:00/00/00
 *color8:     rgb:66/66/66
@@ -58,7 +59,7 @@ URxvt.transparent: true
 *color3:     rgb:d2/bb/4b
 *color11:    rgb:e7/8b/52
 !blue
-*color4:     rgb:41/41/71
+*color4:     rgb:51/61/91
 *color12:    rgb:50/85/af
 !magenta
 *color5:     rgb:96/3c/59
