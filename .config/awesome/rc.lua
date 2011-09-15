@@ -157,7 +157,7 @@ jiffies = {}
 		 end
 		 --return s
 		 --naughty.notify { text = s }
-		 cpugraph:add_value(s)
+		 cpugraph:add_value(s/2)
  end
 
 
@@ -195,16 +195,15 @@ function battery_check ()
 				naughty.notify ({ hover_timeout = 0.2, timeout = 0, title = '<span color="red">Attention!</span>', text = 'battery time is ' .. time, font="terminus-12"})
 				
 			end
-			
-		else 
+		else
 			tw_battery.text = '[<span color="green">' .. time .. '</span>]'
 		end
 	else
-		tw_battery.text = ""
+		tw_battery.text = " "
 	end
 end
 	-- timer for battery check
-battery_timer = timer({ timeout = 30 })
+battery_timer = timer({ timeout = 3 })
 battery_timer:add_signal("timeout", function() battery_check () end)
 battery_timer:start()
 
