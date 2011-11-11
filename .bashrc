@@ -7,7 +7,8 @@
 # don't overwrite GNU Midnight Commander's setting of `ignorespace'.
 #export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups
 # ... or force ignoredups and ignorespace
-export HISTCONTROL=ignoreboth,erasedups
+#export HISTCONTROL=ignoreboth,erasedups
+export HISTCONTROL=ignoreboth
 # ignore come commands in history
 #export HISTIGNORE="[ \t]*:history:ls:cd:exit:&" 
 
