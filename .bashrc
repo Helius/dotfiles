@@ -8,7 +8,7 @@
 #export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups
 # ... or force ignoredups and ignorespace
 #export HISTCONTROL=ignoreboth,erasedups
-export HISTCONTROL=ignoreboth
+export HISTCONTROL=ignoreboth:erasedups
 # ignore come commands in history
 #export HISTIGNORE="[ \t]*:history:ls:cd:exit:&" 
 
