@@ -10,7 +10,7 @@
 #export HISTCONTROL=ignoreboth,erasedups
 export HISTCONTROL=ignoreboth:erasedups
 # ignore come commands in history
-export HISTIGNORE="[ \t]*:history:ls:cd:exit:ll&" 
+export HISTIGNORE="[ \t]*:history:ls:cd:exit:ll:&" 
 
 # append to the history file, don't overwrite it
 shopt -s histappend
