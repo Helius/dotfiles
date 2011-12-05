@@ -165,7 +165,7 @@ map <F3> :TlistToggle<CR>
 " открыть проводник vim
 map <F4> :call VimCommanderToggle()<CR>
 " открыть файл history
-map <F10> :e history.txt<CR>
+"map <F10> :e history.txt<CR>
 " диалог открытия файла
 nmap <silent> <S-o> :CommandT<CR>
 
@@ -227,7 +227,17 @@ menu make.make_run					:!make run<CR>
 menu make.make_clean				:silent make clean<CR><CR>:!<CR><CR>
 menu make.make_tags					:!ctags -R <CR><CR>:!<CR><CR>
 map <F7> :emenu make.<TAB>
-
+"------------------ Spell menu ------------
+set wildmenu
+set wcm=<Tab>
+" проверка орфографии:
+menu SetSpell.ru  :set spl=ru spell<CR>
+menu SetSpell.en  :set spl=en spell<CR>
+menu SetSpell.off :set nospell<CR>
+map <F10> :emenu SetSpell.<Tab>
+" выбор альтернатив:
+imap <F9> <Esc> z=<CR>i
+map <F9> z=<CR>
 
 
 

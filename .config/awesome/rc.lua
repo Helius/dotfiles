@@ -155,8 +155,6 @@ jiffies = {}
 						 jiffies[cpu] = newjiffies
 				 end
 		 end
-		 --return s
-		 --naughty.notify { text = s }
 		 cpugraph:add_value(s/2)
  end
 
@@ -218,7 +216,7 @@ if mode == "update" then
 						fd:close()
 	
 	local volume = string.match(status, "(%d?%d?%d)%%")
-	volume = string.format("%3d", volume)
+	--volume = string.format("%3d", volume)
 
 	status = string.match(status, "%[(o[^%]]*)%]")
 
