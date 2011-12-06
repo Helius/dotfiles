@@ -1,0 +1,8 @@
+#!/bin/bash
+
+QMAKE=/home/weisert/sdk/sigma_3.7.1/qt_SMP86xx_src_4.7.0-0/install/bin/qmake
+SRC=$PWD
+PROJECT=$SRC/$1
+
+$QMAKE MOC_DIR=$SRC/build/.moc OBJECTS_DIR=$SRC/build/.obj UIC_DIR=$SRC/build/.uic DESTDIR=$SRC QMAKE_ABSOLUTE_SOURCE_PATH=$SRC -spec /home/weisert/sdk/sigma_3.7.1/qt_SMP8654F_bin_4.5.2-1.1/src/mkspecs/qws/linux-mips_sigma-g++ -o Makefile $PROJECT
+
