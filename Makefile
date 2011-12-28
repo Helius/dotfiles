@@ -56,10 +56,11 @@ CPD_TARGET=cpd
 .PHONY: dirs common stbapi qtstbapi stbsettings
 .PHONY: stbmain cpd settings weather mediaplayer iptvplayer minitube
 
+all: dirs common stbapi qtstbapi stbsettings stbmain weather mediaplayer iptvplayer settings minitube cpd
+	$(ECHO) "\n\n\nDONE\n"
+
 dirs:
 	$(MKDIR) $(INSTALL) $(SRC)
-all: dirs stbsettings settings stbmain cpd weather mediaplayer iptvplayer minitube
-	$(ECHO) "\n\n\nDONE\n"
 
 clean:
 	$(RM) $(INSTALL)
@@ -79,7 +80,7 @@ qtstbapi: dirs common stbapi
 	$(MKDIR) $(EXT_INC_PATH)
 	$(CP) src/qtstbapi/*.h $(EXT_INC_PATH)
 
-stbsettings: dirs common
+stbsettings: dirs common stbapi
 	$(ECHO) "\n\n\nBuilding stbsettings library\n\n\n"
 	cd $(SRC);git clone git@192.168.24.14:stbsettings.git
 	$(MKDIR) $(EXT_LIB_PATH)
@@ -125,7 +126,7 @@ cpd: dirs common
 	cd $(SRC);git clone git@192.168.24.14:cpd.git
 	cd $(CPD_SRC_PATH); $(WQMAKE) $(CPD_PRO);make all -j8
 
-install: dirs all
+install: all
 	$(MKDIR) $(INSTALL)/$(INST_LIB_PATH)
 	$(CP) $(EXT_LIB_PATH)/* $(INSTALL)/$(INST_LIB_PATH)
 	$(CP) $(STBMAIN_SRC_PATH)/$(STBMAIN_TARGET) $(INSTALL)
