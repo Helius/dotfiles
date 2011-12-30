@@ -156,10 +156,7 @@ jiffies = {}
 						 jiffies[cpu] = newjiffies
 				 end
 		 end
-		 --return s
-		 --local sd = string.format ('%s', s/4)
-		 --naughty.notify { text = sd }
-		 cpugraph:add_value(s/4)
+		 cpugraph:add_value(s/2)
  end
 
 
@@ -183,30 +180,28 @@ end
 
 	-- timers handler, periodically check status and set it to text widget
 function battery_check ()
+
 	local fd = io.popen("acpitool -B ")
 	local status = fd:read("*all")
 	fd:close()
 	local mode = string.match(status, "Charging state%s+:%s+(%l*)%s")
 	local time = string.match(status, "Remaining capacity.*(%d+:%d+:%d+)")
-	if string.find (time, ":") then
-		if string.find (mode, "discharging") then
-			tw_battery.text = '[<span color="red">' .. time .. '</span>]'
+	
+	if mode == 'charging' then
+		tw_battery.text = '[<span color="green">' .. time .. '</span>]'
+	elseif mode == 'discharging' then
+		tw_battery.text = '[<span color="red">' .. time .. '</span>]'
 			local hh, mm, ss = string.match (time, "(%d+):(%d+):(%d+)")
-				
 			if hh == "0" and mm < "10" then
 				naughty.notify ({ hover_timeout = 0.2, timeout = 0, title = '<span color="red">Attention!</span>', text = 'battery time is ' .. time, font="terminus-12"})
-				
 			end
-			
-		else 
-			tw_battery.text = '[<span color="green">' .. time .. '</span>]'
-		end
 	else
-		tw_battery.text = ""
+		tw_battery.text = ''
 	end
 end
+
 	-- timer for battery check
-battery_timer = timer({ timeout = 30 })
+battery_timer = timer({ timeout = 3 })
 battery_timer:add_signal("timeout", function() battery_check () end)
 battery_timer:start()
 

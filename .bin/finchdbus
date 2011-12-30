@@ -5,10 +5,12 @@ import os
 import subprocess
 
 def my_func(account, sender, message, conversation, flags):
+    print sender
+    print message
     name = re.search (ur'^(.*)@', sender)
     text = re.search (ur"<body>(.*)</body>", message)
     #print name.group(1), ":", text.group(1)
-    popup = 'naughty.notify({ font="terminus 10",hover_timeout = 0.2, timeout = 0, text= "' + name.group(1).encode('utf-8') + ' : ' + text.group(1).encode('utf-8') + '" })\n'
+    popup = 'naughty.notify({ font="terminus 10",hover_timeout = 0.2, timeout = 0, text= "' + sender.encode('utf-8') + ' : ' + message.encode('utf-8') + '" })\n'
     #print popup
     proc = subprocess.Popen(['awesome-client', '-'],
                         stdin=subprocess.PIPE,)
