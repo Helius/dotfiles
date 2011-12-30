@@ -664,6 +664,8 @@ client.add_signal("unfocus", function(c) c.border_color = beautiful.border_norma
 -- }}}
 -- exec some command on start awesome fo example setting keyboard
 os.execute("setxkbmap us,ru -option grp_led:caps,grp:caps_toggle &")
+-- set KBD delay and repeate
+os.execute("xset r rate 200 30 &")
 -- set walpaper
 os.execute("nohup feh -Z -F --bg-scale /home/eugene/Dropbox/.wallpapper/12.png &")
 -- set candy-ice interface ))
