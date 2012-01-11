@@ -1,7 +1,7 @@
 CP=cp --no-dereference
 RM=rm -rf
 MKDIR=mkdir -p
-ECHO=echo -e
+ECHO=@echo -e
 
 BUILD=build
 WQMAKE=../../wqmake
@@ -53,10 +53,10 @@ CPD_SRC_PATH=./src/cpd
 CPD_TARGET=cpd
 
 .PHONY: all clean install
-.PHONY: dirs common stbapi qtstbapi stbsettings
+.PHONY: dirs common stbapi qtstbapi qtstbapi-compl stbsettings
 .PHONY: stbmain cpd settings weather mediaplayer iptvplayer minitube
 
-all: dirs common stbapi qtstbapi stbsettings stbmain weather mediaplayer iptvplayer settings minitube cpd
+all: dirs common stbapi qtstbapi qtstbapi-compl stbsettings stbmain weather mediaplayer iptvplayer settings minitube cpd
 	$(ECHO) "\n\n\nDONE\n"
 
 dirs:
@@ -75,10 +75,19 @@ stbapi: dirs
 	$(CP) $(SRC)/stbapi/lib/* $(EXT_LIB_PATH)
 
 qtstbapi: dirs common stbapi
-	cd $(SRC);git clone git@192.168.24.14:qtstbapi.git;cd qtstbapi;$(WQMAKE) player.pro;make -j8
+	cd $(SRC);git clone git@192.168.24.14:qtstbapi.git;cd qtstbapi;$(WQMAKE) qtstbapi.pro;make -j8
 	$(CP) src/qtstbapi/libqtstbapi.so* $(EXT_LIB_PATH)
 	$(MKDIR) $(EXT_INC_PATH)
-	$(CP) src/qtstbapi/*.h $(EXT_INC_PATH)
+	$(CP) src/qtstbapi/firmwareupdater.h $(EXT_INC_PATH)
+	$(CP) src/qtstbapi/player.h $(EXT_INC_PATH)
+	$(CP) src/qtstbapi/rclayout.h $(EXT_INC_PATH)
+	$(CP) src/qtstbapi/source.h $(EXT_INC_PATH)
+	$(CP) src/qtstbapi/track.h $(EXT_INC_PATH)
+
+qtstbapi-compl: dirs common stbapi qtstbapi
+	cd $(SRC);git clone git@192.168.24.14:qtstbapi-compl.git;cd qtstbapi-compl;$(WQMAKE) qtstbapi-compl.pro;make -j8
+	$(CP) src/qtstbapi-compl/libqtstbapi-compl.so* $(EXT_LIB_PATH)
+	$(CP) src/qtstbapi-compl/*.h $(EXT_INC_PATH)
 
 stbsettings: dirs common stbapi
 	$(ECHO) "\n\n\nBuilding stbsettings library\n\n\n"
@@ -91,7 +100,7 @@ stbsettings: dirs common stbapi
 	$(CP) $(STBSETTINGS_SRC_PATH)/$(STBSETTINGS_TARGET)* $(EXT_LIB_PATH)
 	$(CP) $(STBSETTINGS_SRC_PATH)/$(STBSETTINGS_INC) $(EXT_INC_PATH)
 
-stbmain: dirs common stbsettings qtstbapi
+stbmain: dirs common stbsettings qtstbapi qtstbapi-compl
 	$(ECHO) "\n\n\nbuilding stbmain!!!\n\n\n"
 	cd $(SRC);git clone git@192.168.24.14:stbmain.git
 	cd $(STBMAIN_SRC_PATH); $(WQMAKE) $(STBMAIN_PRO);make all -j8
@@ -101,22 +110,22 @@ weather: dirs common
 	cd $(SRC);git clone git@192.168.24.14:weather.git
 	cd $(WEATHER_SRC_PATH); $(WQMAKE) $(WEATHER_PRO);make all -j8
 
-mediaplayer: dirs common qtstbapi stbsettings
+mediaplayer: dirs common qtstbapi qtstbapi-compl stbsettings
 	$(ECHO) "\n\n\nbuilding mediaplayer!!!\n\n\n"
 	cd $(SRC);git clone git@192.168.24.14:mediaplayer.git
 	cd $(MEDIAPLAYER_SRC_PATH); $(WQMAKE) $(MEDIAPLAYER_PRO);make all -j8
 
-iptvplayer: dirs common qtstbapi stbsettings
+iptvplayer: dirs common qtstbapi qtstbapi-compl stbsettings
 	$(ECHO) "\n\n\nbuilding iptvplayer!!!\n\n\n"
 	cd $(SRC);git clone git@192.168.24.14:iptvplayer.git
 	cd $(IPTVPLAYER_SRC_PATH); $(WQMAKE) $(IPTVPLAYER_PRO);make all -j8
 
-settings: dirs common stbsettings qtstbapi
+settings: dirs common stbsettings qtstbapi qtstbapi-compl
 	$(ECHO) "\n\n\nbuilding settings!!!\n\n\n"
 	cd $(SRC);git clone git@192.168.24.14:settings.git
 	cd $(SETTINGS_SRC_PATH); $(WQMAKE) $(SETTINGS_PRO);make all -j8
 
-minitube: dirs common qtstbapi stbsettings
+minitube: dirs common qtstbapi qtstbapi-compl stbsettings
 	$(ECHO) "\n\n\nbuilding minitube!!!\n\n\n"
 	cd $(SRC);git clone git@192.168.24.14:minitube.git
 	cd $(MINITUBE_SRC_PATH); $(WQMAKE) $(MINITUBE_PRO);make all -j8
