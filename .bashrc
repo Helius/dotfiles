@@ -92,7 +92,7 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 
 # some more ls aliases
-alias ll='ls -l'
+alias ll='ls -lh'
 alias la='ls -A'
 alias l='ls -CF'
 
@@ -121,7 +121,7 @@ function svn_diff() {
 }
 
 function git_log {
-	git log --pretty=format:"%h %an %d          %s" --graph
+	git log --pretty=format:"	%h  %ad  %an %d			%s" --graph --date=short "$@"
 }
 #---------------
 # Prompt

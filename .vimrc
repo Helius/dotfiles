@@ -79,6 +79,9 @@ highlight Structure ctermfg=darkgreen
 highlight Function ctermfg=lightblue
 highlight Macro ctermfg=green
 
+"Invisible character colors 
+highlight NonText ctermfg=darkgray
+highlight SpecialKey ctermfg=darkgray
 
 
 set wrap						"перенос длинных строк
@@ -103,6 +106,8 @@ set hidden
 
 " ================== ВНЕШНИЙ ВИД VIM =================
 "set showtabline=2		"показывать строку вкладок всегда
+"set statusline=%<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P "линия статуса внизу (status line)
+set listchars=tab:▸\ ,eol:¬
 set laststatus=2		"показывать строку статуса всегда
 set showcmd					"показывать буфер вводимой команды
 
