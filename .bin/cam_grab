@@ -1,0 +1,36 @@
+#!/bin/bash
+
+DST=$HOME/.web_cam
+
+#if [ -n $1 ]
+#then
+#	echo "usage:"
+#	echo "cam_grab dir [frame_count_in_sec]"
+#	echo "frame_count_in_sec (default 1 frame) - count of frame with 1 second delay"
+#	exit 1
+#fi
+
+if [ $2 ]
+then
+FRAME_COUNT=$2
+else
+FRAME_COUNT=1
+fi
+
+for ((i=0; i <$FRAME_COUNT ; i++))
+do
+	streamer -f jpeg -o pic_0000.jpeg -w 2 -s 640x480 -t 11
+	if [ -n $1 ] 
+	then
+		mkdir -p $DST/$1
+	fi
+#get number of file
+	NMB=`cat $DST/$1/count`
+	let NMB=NMB+1
+	NAME=`printf "%0*d.jpeg" "5" "$NMB"`
+	echo $NMB > $DST/$1/count
+	
+	mv pic_0010.jpeg $DST/$1/$NAME
+	rm pic_0*
+done
+

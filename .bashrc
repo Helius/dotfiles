@@ -121,7 +121,8 @@ function svn_diff() {
 }
 
 function git_log {
-	git log --pretty=format:"	%h  %ad  %an %d			%s" --graph --date=short "$@"
+#	git log --pretty=format:"	%h  %ad  %an %d			%s" --graph --date=short "$@"
+	git log --graph --full-history --all --color --pretty=format:"%x1b[33m%h%x09%x09%x1b[32m%d%x1b[0m %x1b[34m%an%x1b[0m   %s" "$@"
 }
 #---------------
 # Prompt
