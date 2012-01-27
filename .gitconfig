@@ -3,6 +3,20 @@
 	email = ghelius@gmail.com
 [color]
 	diff = always
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+[color "diff"]
+	meta = yellow bold
+	frag = magenta
+	old = red
+	new = green
+[color "status"]
+	added = yellow
+	changed = green
+	untracked = cyan
+
 [merge]
 	tool = vimdiff
 [core]
