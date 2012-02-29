@@ -419,8 +419,23 @@ globalkeys = awful.util.table.join(
 											bg="#202525",
 											margin = 9,
 											font = "terminus 10"
-											
 										})
+    					end),
+		----- past buffer to ProjectBox
+		awful.key({ modkey,  					}, "p", 
+							function ()
+										local text_ = awful.util.pread("xclip -o | /home/eugene/.bin/pb")
+									  naughty.notify({  
+											text = text_, 
+											timeout = 15, 
+											border_width = 0,
+											position = "top_right",
+											fg="#a0faaa",
+											bg="#202525",
+											margin = 9,
+											font = "terminus 10"
+										})
+										os.execute (text_ .."|xclip");
     					end),
 
 		----- web seaarch run

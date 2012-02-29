@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# First, create file ~/.projectbox with following lines:
+# SERVER=projectbox.ru
+# SECRET=<your secret>
+#
+# You can grab your secret line here:
+# http://projectbox.ru/account/settings/
+#
+# Put this script into your $PATH dir (e.g. "/usr/local/bin/pb")
+# Then make it executable (e.g. "chmod +x /usr/local/bin/pb")
+#
+# Use it this way:
+# cat path/to/file | pb [optoins] title
+# Options are:
+#   --lang    - file content programming language
+#   --secret  - your secret API key
+#
+
+# predefined variables
+VERSION="0.2"
+SERVER="projectbox.ru"
+SECRET=""
+TITLE=""
+PLANG=""
+
+# get text from STDIN
+TEXT=$(cat)
+
+# try to read config file
+if [[ -e "$HOME/.projectbox" ]]; then
+    while read LINE; do
+        case "${LINE/=*/}" in
+            SERVER) SERVER=${LINE/*=/} ;;
+            SECRET) SECRET=${LINE/*=/} ;;
+        esac
+    done < "$HOME/.projectbox"
+fi
+
+# try to get lang and title
+while [ $# != 0 ]; do
+    case "$1" in
+        --lang)   PLANG=$2 && shift ;;
+        --lang=*) PLANG=${1:7} ;;
+        --secret)   SECRET=$2 && shift ;;
+        --secret=*) SECRET=${1:9} ;;
+        *) [[ -z $TITLE ]] && TITLE=$1 ;;
+    esac
+    shift
+done
+
+# check params
+[[ -z $SERVER ]] && echo "ERROR: need server" >&2 && exit -1
+[[ -z $SECRET ]] && echo "ERROR: need secret" >&2 && exit -1
+[[ -z $TEXT   ]] && echo "ERROR: need text"   >&2 && exit -1
+
+# prepare URL
+URL="http://$SERVER/api/add/?secret=${SECRET}"
+[[ ! -z $PLANG ]] && URL="${URL}&lang=${PLANG}"
+[[ ! -z $TITLE ]] && URL="${URL}&title=${TITLE}"
+
+# upload and check result
+RESULT=$(curl --silent --user-agent "PB shell script 0.1" --data-urlencode "text=$TEXT" $URL)
+[[ ${RESULT:0:4} != 'http' ]] && echo $RESULT > /home/eugene/error_log && exit -1
+echo $RESULT
