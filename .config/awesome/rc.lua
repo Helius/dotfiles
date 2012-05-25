@@ -156,7 +156,12 @@ jiffies = {}
 						 jiffies[cpu] = newjiffies
 				 end
 		 end
-		 cpugraph:add_value(s/2)
+		
+		local fd = io.popen("grep -c '^processor' /proc/cpuinfo ")
+		local data = fd:read("*all")
+		fd:close()
+		--naughty.notify ({text=data .. ":" .. s .. ":" .. s/data, timeout=10})	
+		cpugraph:add_value(s/data)
  end
 
 
