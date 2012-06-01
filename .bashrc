@@ -146,3 +146,6 @@ export EDITOR=/usr/bin/vim
 if [ -d "$HOME/.bin" ] ; then
   PATH="$HOME/.bin:$PATH"
 fi
+
+# ignore case at completion cd dro -> cd Dropbox
+echo 'set completion-ignore-case on' >> ~/.inputrc
