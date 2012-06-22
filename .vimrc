@@ -78,7 +78,6 @@ highlight cType ctermfg=darkgreen
 highlight Structure ctermfg=darkgreen
 highlight Function ctermfg=lightblue
 highlight Macro ctermfg=green
-
 "Invisible character colors 
 highlight NonText ctermfg=darkgray
 highlight SpecialKey ctermfg=darkgray
@@ -106,7 +105,7 @@ set hidden
 
 " ================== ВНЕШНИЙ ВИД VIM =================
 "set showtabline=2		"показывать строку вкладок всегда
-"set statusline=%<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P "линия статуса внизу (status line)
+set statusline=%<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P "линия статуса внизу (status line)
 set listchars=tab:▸\ ,eol:¬
 set laststatus=2		"показывать строку статуса всегда
 set showcmd					"показывать буфер вводимой команды
@@ -140,9 +139,9 @@ map <S-Right>	:vertical resize +15<CR>
 map <S-Left>	:vertical resize -15<CR>
 map <s-down>	:resize +20<CR>
 map <s-up>	:resize -20<CR>
-" коментирование - ракоментирования текста
-map <C-K> :s/^/\/\//<CR>:nohl<CR>
-map <C-U> :s/^\/\///<CR>:nohl<CR>
+" " коментирование - ракоментирования текста
+map <C-K> :TComment<CR>
+" map <C-U> :s/^\/\///<CR>:nohl<CR>
 " создание табов
 nmap <S-T> :tabnew<CR>
 " удаление буфера
