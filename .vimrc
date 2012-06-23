@@ -194,6 +194,7 @@ map <F8> :emenu Encoding.<TAB>
 set wildmenu
 set wcm=<Tab>
 menu insert.//*80*          i//*****************************************************************************
+menu insert.//-80-          i//-------------------------------------------------------
 menu insert.Helius					i//@@@@@@ Changed by Helius @@@@@@<ESC>
 menu insert.date-time       :r !date +"\%d.\%m.\%Y \%k:\%M"<CR>
 map <F5> :emenu insert.<TAB>
