@@ -148,4 +148,4 @@ if [ -d "$HOME/.bin" ] ; then
 fi
 
 # ignore case at completion cd dro -> cd Dropbox
-echo 'set completion-ignore-case on' >> ~/.inputrc
+echo 'set completion-ignore-case on' > ~/.inputrc
