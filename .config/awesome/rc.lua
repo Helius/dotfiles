@@ -176,7 +176,7 @@ tw_lan = widget({ type = "textbox", name = "tw_lan", align = "left" })
 tw_lan.text = '0 Kb'
 
 langraph = awful.widget.graph()
-langraph:set_width(25)
+langraph:set_width(20)
 langraph:set_background_color('#0e0e0e')
 langraph:set_color('#5C47A1')
 --langraph.set_scale (true)
@@ -187,63 +187,64 @@ langraph:set_gradient_angle (0)
 langraph.widget:add_signal("mouse::enter", 				function () 				naughty.notify ({text=string.format("%d Kb/s", lastLanVal), timeout=2}) end)
 
 
+lanValueArray = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+lanValueIndex = 1 -- index in lua begin from 1
 lanOldRx = 0
 lastLanVal = 0
 lanFirstRun = 1
---lanMaxValue = 0
---lanMaxValue_cout = 25
---lanSubMaxValue = 0
---lanSubMaxValue_count = 24
+
 function activelan ()
 	local fd = io.popen("ifconfig wlan0")
 	local ifconf = fd:read ("*all")
 	local rx = string.match (ifconf, "RX bytes:([0-9]+)")
-	lastLanVal = (rx-lanOldRx)*8/3000 -- 3000 because 1000 byte * 3 sec
-	--local diff = string.format("%d", lastLanVal) 
-	--local diff = lastLanVal
+	lastLanVal = (rx-lanOldRx)*8/1024
 	lanOldRx = rx
 	if lanFirstRun == 1 then
 		lanFirstRun = 0
 	else
 		langraph:add_value(lastLanVal)
+	-- add new value to array
+		lanValueArray [lanValueIndex] = lastLanVal
+		lanValueIndex = lanValueIndex+1
+		if (lanValueIndex > 20) then
+			lanValueIndex = 1
+		end
+  -- calc max array value
+	local maxVal = 0
+	for i=1, 20 do
+		if lanValueArray[i] > maxVal then
+			maxVal = lanValueArray[i]
+		end
+	end
+	
+--	naughty.notify ({text = string.format("%d",maxVal)})
 
---		if lastLanVal > lanMaxValue then
---			lanMaxValue = lastLanVal
---			lanMaxValue_cout = 25
---		elseif lastLanVal > lanSubMaxValue then
---			lanSubMaxValue = lastLanVal
---			lanSubMaxValue_count = 25
---		end
---
---		lanMaxValue_cout=lanMaxValue_cout-1
---		lanSubMaxValue_count = lanSubMaxValue_count-1
-
-		if lastLanVal <= 10 then
+		if maxVal <= 10 then
 			tw_lan.text = '10 Kb'
 			langraph:set_max_value (10)
-		elseif lastLanVal > 10 and lastLanVal <= 50 then
+		elseif maxVal > 10 and maxVal <= 50 then
 			tw_lan.text = '50 Kb'
 			langraph:set_max_value (50)
-		elseif lastLanVal > 50 and lastLanVal <= 100 then
+		elseif maxVal > 50 and maxVal <= 100 then
 			tw_lan.text = '100 Kb'
 			langraph:set_max_value (100)
-		elseif lastLanVal > 100 and lastLanVal <= 200 then
+		elseif maxVal > 100 and maxVal <= 200 then
 			tw_lan.text = '200 Kb'
 			langraph:set_max_value (200)
-		elseif lastLanVal > 200 and lastLanVal <= 500 then
+		elseif maxVal > 200 and maxVal <= 500 then
 			tw_lan.text = '500 Kb'
 			langraph:set_max_value (500)
-		elseif lastLanVal > 500 and lastLanVal <= 1000 then
+		elseif maxVal > 500 and maxVal <= 1000 then
 			tw_lan.text = '1 Mb'
 			langraph:set_max_value (1000)
-		elseif lastLanVal > 1000 then
+		elseif maxVal > 1000 then
 			tw_lan.text = '3 Mb'
 			langraph:set_max_value (3000)
 		end
 	end
 end
 
-lan_timer = timer({ timeout = 3 })
+lan_timer = timer({ timeout = 1 })
 lan_timer:add_signal("timeout", function() activelan () end)
 lan_timer:start()
 
