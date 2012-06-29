@@ -219,27 +219,30 @@ function activelan ()
 	
 --	naughty.notify ({text = string.format("%d",maxVal)})
 
-		if maxVal <= 10 then
-			tw_lan.text = '10 Kb'
-			langraph:set_max_value (10)
-		elseif maxVal > 10 and maxVal <= 50 then
-			tw_lan.text = '50 Kb'
+--		if maxVal <= 10 then
+--			tw_lan.text = '10Kb'
+--			langraph:set_max_value (10)
+		if maxVal > 10 and maxVal <= 50 then
+			tw_lan.text = '50Kb'
 			langraph:set_max_value (50)
 		elseif maxVal > 50 and maxVal <= 100 then
-			tw_lan.text = '100 Kb'
+			tw_lan.text = '100Kb'
 			langraph:set_max_value (100)
 		elseif maxVal > 100 and maxVal <= 200 then
-			tw_lan.text = '200 Kb'
+			tw_lan.text = '200Kb'
 			langraph:set_max_value (200)
 		elseif maxVal > 200 and maxVal <= 500 then
-			tw_lan.text = '500 Kb'
+			tw_lan.text = '500Kb'
 			langraph:set_max_value (500)
 		elseif maxVal > 500 and maxVal <= 1000 then
-			tw_lan.text = '1 Mb'
+			tw_lan.text = '1<span color="green">Mb</span>'
 			langraph:set_max_value (1000)
 		elseif maxVal > 1000 then
-			tw_lan.text = '3 Mb'
+			tw_lan.text = '3<span color="green">Mb</span>'
 			langraph:set_max_value (3000)
+		else
+			tw_lan.text = '10Kb'
+			langraph:set_max_value (10)
 		end
 	end
 end
