@@ -194,11 +194,12 @@ lastLanVal = 0
 lanFirstRun = 1
 
 function activelan ()
-	local fd = io.popen("ifconfig eth0")
+	local fd = io.popen("ifconfig wlan0")
 	local ifconf = fd:read ("*all")
 	local rx = string.match (ifconf, "RX bytes:([0-9]+)")
-	lastLanVal = (rx-lanOldRx)*8/1024
-	lanOldRx = rx
+	local tx = string.match (ifconf, "TX bytes:([0-9]+)")
+	lastLanVal = (rx+tx-lanOldRx)*8/1024
+	lanOldRx = rx+tx
 	if lanFirstRun == 1 then
 		lanFirstRun = 0
 	else
