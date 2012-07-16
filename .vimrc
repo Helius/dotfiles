@@ -12,6 +12,7 @@ set autoindent		"включить автоотступы
 set smartindent		"Умные" отступы (например, автоотступ после {)
 set showmatch			"показывать первую парную скобку после ввода второй ...
 syn on
+au BufNewFile,BufRead *.qml set filetype=qml
 
 "включаем автодополнения 
 autocmd FileType c set omnifunc=ccomplete#Complete
