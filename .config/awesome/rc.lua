@@ -194,6 +194,7 @@ lastLanVal = 0
 lanFirstRun = 1
 
 function activelan ()
+	--local fd = io.popen("ifconfig eth0")
 	local fd = io.popen("ifconfig wlan0")
 	local ifconf = fd:read ("*all")
 	local rx = string.match (ifconf, "RX bytes:([0-9]+)")
@@ -774,3 +775,4 @@ os.execute("nohup xcompmgr -cC &")
 -- start virtual mashine with XP
 -- os.execute("nohup VBoxManage startvm virtXP &")
 os.execute("finchdbus &")
+os.execute("ubuntuone-launch&")
