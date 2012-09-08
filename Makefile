@@ -73,23 +73,12 @@ common: dirs
 
 stbapi: dirs
 	cd $(SRC);git clone git@$(SRV_NAME):stbapi.git;cd stbapi/src;make -j8 install
-	$(MKDIR) $(EXT_LIB_PATH)
-	$(CP) $(SRC)/stbapi/lib/* $(EXT_LIB_PATH)
 
 qtstbapi: dirs common stbapi
-	cd $(SRC);git clone git@$(SRV_NAME):qtstbapi.git;cd qtstbapi;$(WQMAKE) qtstbapi.pro;make -j8
-	$(CP) src/qtstbapi/libqtstbapi.so* $(EXT_LIB_PATH)
-	$(MKDIR) $(EXT_INC_PATH)
-	$(CP) src/qtstbapi/firmwareupdater.h $(EXT_INC_PATH)
-	$(CP) src/qtstbapi/player.h $(EXT_INC_PATH)
-	$(CP) src/qtstbapi/rclayout.h $(EXT_INC_PATH)
-	$(CP) src/qtstbapi/source.h $(EXT_INC_PATH)
-	$(CP) src/qtstbapi/track.h $(EXT_INC_PATH)
+	cd $(SRC);git clone git@$(SRV_NAME):qtstbapi.git;cd qtstbapi;$(WQMAKE) qtstbapi.pro;make -j8 install
 
 qtstbapi-compl: dirs common stbapi qtstbapi
-	cd $(SRC);git clone git@$(SRV_NAME):qtstbapi-compl.git;cd qtstbapi-compl;$(WQMAKE) qtstbapi-compl.pro;make -j8
-	$(CP) src/qtstbapi-compl/libqtstbapi-compl.so* $(EXT_LIB_PATH)
-	$(CP) src/qtstbapi-compl/*.h $(EXT_INC_PATH)
+	cd $(SRC);git clone git@$(SRV_NAME):qtstbapi-compl.git;cd qtstbapi-compl;$(WQMAKE) qtstbapi-compl.pro;make -j8 install
 
 stbsettings: dirs common stbapi
 	$(ECHO) "\n\n\nBuilding stbsettings library\n\n\n"
