@@ -94,7 +94,7 @@ stbsettings: dirs common stbapi
 stbmain: dirs common stbsettings qtstbapi qtstbapi-compl
 	$(ECHO) "\n\n\nbuilding stbmain!!!\n\n\n"
 	cd $(SRC);git clone git@$(SRV_NAME):stbmain.git
-	cd $(STBMAIN_SRC_PATH); $(WQMAKE) $(STBMAIN_PRO);make all -j8
+	cd $(STBMAIN_SRC_PATH); $(WQMAKE) $(STBMAIN_PRO);make -j8 install
 
 weather: dirs common
 	$(ECHO) "\n\n\nbuilding weather!!!\n\n\n"
