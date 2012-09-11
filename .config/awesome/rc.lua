@@ -12,7 +12,7 @@ require("debian.menu")
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
-beautiful.init("/home/eugene/.config/awesome/themes/darkness/theme.lua")
+beautiful.init(awful.util.getdir("config") .. "/themes/darkness/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "x-terminal-emulator"
@@ -25,6 +25,19 @@ editor_cmd = terminal .. " -e " .. editor
 -- I suggest you to remap Mod4 to another key using xmodmap or other tools.
 -- However, you can use another modifier like Mod1, but it may interact with others.
 modkey = "Mod4"
+
+-- ****************** user config function **********************
+-- read config file
+configf = io.open(awful.util.getdir("config") .. "/user.config")
+config = configf:read("*a");
+
+-- return config value from key
+function get_config_value (key)
+	local val = string.match (config, "iface=(.+)")
+	return val
+end
+-- **************************************************************
+
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 layouts =
@@ -194,8 +207,8 @@ lastLanVal = 0
 lanFirstRun = 1
 
 function activelan ()
-	--local fd = io.popen("ifconfig eth0")
-	local fd = io.popen("ifconfig wlan0")
+	local fd = io.popen("ifconfig " .. get_config_value ("iface"))
+	--local fd = io.popen("ifconfig wlan0")
 	local ifconf = fd:read ("*all")
 	local rx = string.match (ifconf, "RX bytes:([0-9]+)")
 	local tx = string.match (ifconf, "TX bytes:([0-9]+)")
@@ -239,9 +252,12 @@ function activelan ()
 		elseif maxVal > 500 and maxVal <= 1000 then
 			tw_lan.text = '1<span color="green">Mb</span>'
 			langraph:set_max_value (1000)
-		elseif maxVal > 1000 then
+		elseif maxVal > 1000 and maxVal <= 3000 then
 			tw_lan.text = '3<span color="green">Mb</span>'
 			langraph:set_max_value (3000)
+		elseif maxVal > 3000 then
+			tw_lan.text = '10<span color="green">Mb</span>'
+			langraph:set_max_value (10000)
 		else
 			tw_lan.text = '10Kb'
 			langraph:set_max_value (10)
@@ -701,18 +717,18 @@ function db_timer_hook ()
 				else 
 					db_icon.image = image(awful.util.getdir("config") .. "/icons/dropbox/3/busy.png")
 				end
-					naughty.notify ({
-							text = db_text,
-							title = "dropbox",
-							position = "bottom_right",
-							timeout = 2,
-							icon = awful.util.getdir("config") .. "/icon/db_icon/dropbox.png", -- path to dropbox icon for popup (~/.config/awesom/db_icon for me)
-							fg="#a0aaaa",
-							bg="#202525",
-							width = 300,
-							font = "terminus 9",
-							border_width = 0
-					})
+-- 					naughty.notify ({
+-- 							text = db_text,
+-- 							title = "dropbox",
+-- 							position = "bottom_right",
+-- 							timeout = 2,
+-- 							icon = awful.util.getdir("config") .. "/icon/db_icon/dropbox.png", -- path to dropbox icon for popup (~/.config/awesom/db_icon for me)
+-- 							fg="#a0aaaa",
+-- 							bg="#202525",
+-- 							width = 300,
+-- 							font = "terminus 9",
+-- 							border_width = 0
+-- 					})
 					old_db_text = db_text;
 			end	
 		end
