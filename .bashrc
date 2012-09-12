@@ -9,7 +9,7 @@
 # ... or force ignoredups and ignorespace
 export HISTCONTROL=ignoreboth:erasedups
 # ignore come commands in history
-export HISTIGNORE="git commit:ls:cd:exit:ll:&" 
+export HISTIGNORE="git commit:ls:cd:exit:ll" 
 
 # append to the history file, don't overwrite it
 shopt -s histappend
@@ -120,8 +120,8 @@ function svn_diff() {
 }
 
 function git_log {
-#	git log --graph --full-history --all --color --date=short --date=relative --pretty=format:"%x1b[33m%h%x09%x09%x1b[34m%ad%x09%an%x1b[32m%d%x1b[0m%x1b[0m%x09%s" "$@"
-	git log --graph --full-history --all --color --date=short --date=relative --pretty=format:"%x1b[33m%h%x1b[32m%d%x1b[0m%x1b[0m%x09%s%x09           %x1b[34m%an  %ad%x1b[32m" "$@"
+	git log --graph --full-history --all --color --date=short --date=relative --date-order --pretty=format:"%x1b[33m%h%x09%x09%x1b[34m%ad%x09%an%x1b[32m%d%x1b[0m%x1b[0m%x09%s" "$@"
+#	git log --graph --full-history --all --color --date=short --date=relative --pretty=format:"%x1b[33m%h%x1b[32m%d%x1b[0m%x1b[0m%x09%s%x09           %x1b[34m%an  %ad%x1b[32m" "$@"
 }
 #---------------
 # Prompt
