@@ -88,7 +88,6 @@ if [ -x /usr/bin/dircolors ]; then
     alias egrep='egrep --color=auto'
     
     alias tree='tree -AC --dirsfirst'
-    alias mc='/usr/bin/mc -u'
 fi
 
 # some more ls aliases
