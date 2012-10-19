@@ -1,6 +1,7 @@
 #!/bin/bash
 
 QMAKE=qmake
+[ $QT_DIR ] && QMAKE=$QT_DIR/bin/qmake
 SRC=$PWD
 PROJECT=$SRC/$1
 

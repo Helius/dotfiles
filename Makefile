@@ -6,7 +6,7 @@ ECHO=@echo -e
 SRV_NAME=gitlab.stb.eltex.loc
 
 BUILD=build
-WQMAKE=../../wqmake
+WQMAKE=$(CURDIR)/wqmake
 INSTALL=install
 SRC=src
 
