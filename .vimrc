@@ -3,6 +3,65 @@
 "					ghelius@gmail.com
 "------------------------------------------------
 
+
+" ================== VUNDLE CONFIG ==================
+set nocompatible               " be iMproved
+filetype off                   " required!
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+"================= VUNDLE SECTION =============
+" let Vundle manage Vundle
+" required! 
+Bundle 'gmarik/vundle'
+
+" My Bundles here:
+"
+" original repos on github
+ Bundle 'tpope/vim-fugitive'
+" Bundle 'Lokaltog/vim-easymotion'
+" Bundle 'rstacruz/sparkup', {'rtp': 'vim/'}
+" Bundle 'tpope/vim-rails.git'
+" vim-scripts repos
+Bundle 'https://github.com/bling/vim-airline.git'
+Bundle 'L9'
+Bundle 'FuzzyFinder'
+Bundle 'https://github.com/Valloric/YouCompleteMe'
+" non github repos
+Bundle 'git://git.wincent.com/command-t.git'
+" git repos on your local machine (ie. when working on your own plugin)
+" Bundle 'file:///Users/gmarik/path/to/plugin'
+" ...
+filetype plugin indent on     " required!
+"
+" Brief help
+" :BundleList          - list configured bundles
+" :BundleInstall(!)    - install(update) bundles
+" :BundleSearch(!) foo - search(or refresh cache first) for foo
+" :BundleClean(!)      - confirm(or auto-approve) removal of unused bundles
+"
+" see :h vundle for more details or wiki for FAQ
+" NOTE: comments after Bundle command are not allowed..
+"=============== VUNDLE END ==========================
+
+
+"============== AIRLINE CONFIG (status line) =========
+let g:airline_theme='light'
+
+let g:airline_enable_fugitive=1
+"let g:airline_enable_syntastic=1
+"let g:airline_enable_bufferline=1
+
+" symbol replace
+let g:airline_left_sep = '▶'
+let g:airline_right_sep = '◀'
+let g:airline_linecolumn_prefix = '¶ '
+let g:airline_fugitive_prefix = '⎇ '
+let g:airline_paste_symbol = 'ρ'
+
+"============== AIRLINE END ==========================
+
+
+
 set magic
 " фикс для русских клавиш
 set langmap=йq,цw,уe,кr,еt,нy,гu,шi,щo,зp,х[,ъ],фa,ыs,вd,аf,пg,рh,оj,лk,дl,ж\\;,э',яz,чx,сc,мv,иb,тn,ьm,б\\,,ю.,ё`,ЙQ,ЦW,УE,КR,ЕT,НY,ГU,ШI,ЩO,ЗP,Х{,Ъ},ФA,ЫS,ВD,АF,ПG,РH,ОJ,ЛK,ДL,Ж:,Э\\",ЯZ,ЧX,СC,МV,ИB,ТN,ЬM,Б<,Ю>,Ё~

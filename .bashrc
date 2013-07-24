@@ -9,7 +9,7 @@
 # ... or force ignoredups and ignorespace
 export HISTCONTROL=ignoreboth:erasedups
 # ignore come commands in history
-export HISTIGNORE="git commit:ls:cd:exit:ll" 
+export HISTIGNORE="git commit:ls:cd:exit:git reset*:ll" 
 
 # append to the history file, don't overwrite it
 shopt -s histappend

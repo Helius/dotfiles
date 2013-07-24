@@ -7,7 +7,7 @@ URxvt.shading: 40
 !URxvt.blurRadius: 10
 
 URxvt.perl-ext-common: selection,searchable-scrollback,readline,tabbed_new
-URxvt.saveLines: 9999
+URxvt.saveLines: 99999
 URxvt.mouseWheelScrollPage: false
 
 URxvt.font: xft:terminus-10: pixelsize=12: autohint=true: antialias=true
