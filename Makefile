@@ -35,10 +35,15 @@ MEDIAPLAYER_SRC_PATH=./src/mediaplayer
 MEDIAPLAYER_TARGET=libmediaplayer.so
 MEDIAPLAYER_PATH=mediaplayer
 
-IPTVPLAYER_PRO=iptvplayer.pro
-IPTVPLAYER_SRC_PATH=./src/iptvplayer
-IPTVPLAYER_TARGET=libiptvplayer.so
-IPTVPLAYER_PATH=iptvplayer
+#IPTVPLAYER_PRO=iptvplayer.pro
+#IPTVPLAYER_SRC_PATH=./src/iptvplayer
+#IPTVPLAYER_TARGET=libiptvplayer.so
+#IPTVPLAYER_PATH=iptvplayer
+
+IPTVPLAYER_PRO=iptv_new.pro
+IPTVPLAYER_SRC_PATH=./src/iptv_new
+IPTVPLAYER_TARGET=libiptv_new.so
+IPTVPLAYER_PATH=iptv_new
 
 SETTINGS_PRO=settings.pro
 SETTINGS_SRC_PATH=./src/settings
@@ -108,8 +113,8 @@ mediaplayer: dirs common qtstbapi qtstbapi-compl stbsettings
 
 iptvplayer: dirs common qtstbapi qtstbapi-compl stbsettings
 	$(ECHO) "\n\n\nbuilding iptvplayer!!!\n\n\n"
-	cd $(SRC);git clone git@$(SRV_NAME):iptvplayer.git
-	cd $(IPTVPLAYER_SRC_PATH); $(WQMAKE) $(IPTVPLAYER_PRO);make all -j8
+	cd $(SRC);git clone git@$(SRV_NAME):iptv_new.git
+	cd $(IPTVPLAYER_SRC_PATH); $(WQMAKE) $(IPTVPLAYER_PRO);make -j8 install
 
 settings: dirs common stbsettings qtstbapi qtstbapi-compl
 	$(ECHO) "\n\n\nbuilding settings!!!\n\n\n"
