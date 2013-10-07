@@ -104,12 +104,12 @@ stbmain: dirs common stbsettings qtstbapi qtstbapi-compl
 weather: dirs common
 	$(ECHO) "\n\n\nbuilding weather!!!\n\n\n"
 	cd $(SRC);git clone git@$(SRV_NAME):weather.git
-	cd $(WEATHER_SRC_PATH); $(WQMAKE) $(WEATHER_PRO);make all -j8
+	cd $(WEATHER_SRC_PATH); $(WQMAKE) $(WEATHER_PRO);make -j8 install
 
 mediaplayer: dirs common qtstbapi qtstbapi-compl stbsettings
 	$(ECHO) "\n\n\nbuilding mediaplayer!!!\n\n\n"
 	cd $(SRC);git clone git@$(SRV_NAME):mediaplayer.git
-	cd $(MEDIAPLAYER_SRC_PATH); $(WQMAKE) $(MEDIAPLAYER_PRO);make all -j8
+	cd $(MEDIAPLAYER_SRC_PATH); $(WQMAKE) $(MEDIAPLAYER_PRO);make -j8 install
 
 iptvplayer: dirs common qtstbapi qtstbapi-compl stbsettings
 	$(ECHO) "\n\n\nbuilding iptvplayer!!!\n\n\n"
@@ -119,12 +119,12 @@ iptvplayer: dirs common qtstbapi qtstbapi-compl stbsettings
 settings: dirs common stbsettings qtstbapi qtstbapi-compl
 	$(ECHO) "\n\n\nbuilding settings!!!\n\n\n"
 	cd $(SRC);git clone git@$(SRV_NAME):settings.git
-	cd $(SETTINGS_SRC_PATH); $(WQMAKE) $(SETTINGS_PRO);make all -j8
+	cd $(SETTINGS_SRC_PATH); $(WQMAKE) $(SETTINGS_PRO);make -j8 install
 
 minitube: dirs common qtstbapi qtstbapi-compl stbsettings
 	$(ECHO) "\n\n\nbuilding minitube!!!\n\n\n"
 	cd $(SRC);git clone git@$(SRV_NAME):minitube.git
-	cd $(MINITUBE_SRC_PATH); $(WQMAKE) $(MINITUBE_PRO);make all -j8
+	cd $(MINITUBE_SRC_PATH); $(WQMAKE) $(MINITUBE_PRO);make -j8 install
 
 cpd: dirs common
 	$(ECHO) "\n\n\nbuilding copy daemon!!!\n\n\n"
@@ -134,16 +134,4 @@ cpd: dirs common
 install: all
 	$(MKDIR) $(INSTALL)/$(INST_LIB_PATH)
 	$(CP) $(EXT_LIB_PATH)/* $(INSTALL)/$(INST_LIB_PATH)
-	$(CP) $(STBMAIN_SRC_PATH)/$(STBMAIN_TARGET) $(INSTALL)
-	$(MKDIR) $(INSTALL)/$(WEATHER_PATH)
-	$(CP) $(WEATHER_SRC_PATH)/$(WEATHER_TARGET) $(INSTALL)/$(WEATHER_PATH)
-	$(MKDIR) $(INSTALL)/$(MEDIAPLAYER_PATH)
-	$(CP) $(MEDIAPLAYER_SRC_PATH)/$(MEDIAPLAYER_TARGET) $(INSTALL)/$(MEDIAPLAYER_PATH)
-	$(MKDIR) $(INSTALL)/$(IPTVPLAYER_PATH)
-	$(CP) $(IPTVPLAYER_SRC_PATH)/$(IPTVPLAYER_TARGET) $(INSTALL)/$(IPTVPLAYER_PATH)
-	$(MKDIR) $(INSTALL)/$(SETTINGS_PATH)
-	$(CP) $(SETTINGS_SRC_PATH)/$(SETTINGS_TARGET) $(INSTALL)/$(SETTINGS_PATH)
 	$(CP) $(CPD_SRC_PATH)/$(CPD_TARGET) $(INSTALL)
-	$(MKDIR) $(INSTALL)/$(MINITUBE_PATH)
-	$(CP) $(MINITUBE_SRC_PATH)/$(MINITUBE_TARGET) $(INSTALL)/$(MINITUBE_PATH)
-
