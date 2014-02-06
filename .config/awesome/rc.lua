@@ -661,6 +661,8 @@ awful.rules.rules = {
     -- Set Firefox to always map on tags number 2 of screen 1.
     { rule = { class = "Firefox" },
       properties = { tag = tags[1][3] } },
+    { rule = { class = "studio" },
+      properties = { tag = tags[1][4] } },
 	{ rule = { class = "VirtualBox" },
 	  properties = { tag = tags[1][9] } },
 

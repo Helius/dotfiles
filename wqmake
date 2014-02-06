@@ -1,9 +1,0 @@
-#!/bin/bash
-
-QMAKE=qmake
-[ $QT_DIR ] && QMAKE=$QT_DIR/bin/qmake
-SRC=$PWD
-PROJECT=$SRC/$1
-
-$QMAKE MOC_DIR=$SRC/build/.moc OBJECTS_DIR=$SRC/build/.obj UIC_DIR=$SRC/build/.uic DESTDIR=$SRC QMAKE_ABSOLUTE_SOURCE_PATH=$SRC -o Makefile $PROJECT
-
