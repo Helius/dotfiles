@@ -1,6 +1,6 @@
 [user]
-	name = Eugene.Samoylov
-	email = Eugene.Samylov@eltex.loc
+	name = Eugene Samoylov
+	email = eugene.samylov@eltex.loc
 [color]
 	diff = always
 [color "branch"]
@@ -22,6 +22,6 @@
 [core]
 	editor = vim
 [diff]
-	external = git_diff_wrapper
+	#external = git_diff_wrapper
 [pager]
 	diff =
