@@ -786,7 +786,8 @@ os.execute("setxkbmap us,ru -option grp_led:caps,grp:caps_toggle &")
 -- set KBD delay and repeate
 os.execute("xset r rate 200 30 &")
 -- set walpaper
-os.execute("nohup feh -Z -F --bg-scale /home/eugene/Dropbox/.wallpapper/12.png &")
+-- os.execute("nohup feh -Z -F --bg-scale /home/eugene/Dropbox/.wallpapper/12.png &")
+os.execute("hsetroot -solid '#202020'");
 -- set candy-ice interface ))
 os.execute("nohup xcompmgr -cC &")
 --os.execute("nohup xrandr --output VGA1 --mode 1920x1080 --right-of HDMI1 &")

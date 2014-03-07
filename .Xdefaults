@@ -2,8 +2,8 @@ URxvt.termName: rxvt
 URxvt.inheritPixmap: true
 URxvt.imLocale: ru_RU.UTF-8
 URxvt.urlLauncher: firefox
-URxvt.fading: 20%
-URxvt.shading: 40
+URxvt.fading: 50%
+URxvt.shading: 90
 !URxvt.blurRadius: 10
 
 URxvt.perl-ext-common: selection,searchable-scrollback,readline,tabbed_new
