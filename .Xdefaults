@@ -3,30 +3,29 @@ URxvt.inheritPixmap: true
 URxvt.imLocale: ru_RU.UTF-8
 URxvt.urlLauncher: firefox
 URxvt.fading: 20%
-URxvt.shading: 40
+URxvt.shading: 90
 !URxvt.blurRadius: 10
 
 URxvt.perl-ext-common: selection,searchable-scrollback,readline,tabbed_new
-URxvt.saveLines: 9999
+URxvt.saveLines: 99999
 URxvt.mouseWheelScrollPage: false
 
 URxvt.font: xft:terminus-10: pixelsize=12: autohint=true: antialias=true
 
 URxvt.scrollstyle: plain
 URxvt.scrollBar_right: true
-URxvt.scrollBar: true
+URxvt.scrollBar: false
 URxvt.jumpScroll: true
 
 ! ======= plugin setup =======
 URxvt.perl-lib: /home/eugene/.urxvt/
-URxvt.perl-ext: selection,mark-yank-urls,urxvt_timestamp
+URxvt.perl-ext: selection,mark-yank-urls
 ! url yank
 URxvt.keysym.M-u: perl:mark-yank-urls:activate_mark_mode
 URxvt.underlineURLs: true
 URxvt.urlLauncher: firefox
 
-! timestamps
-URxvt.keysym.M-l: perl:urxvt_timestamp:activate_mark_mode
+
 
 ! tabbed-new
 URxvt.tabbed_new.tabren-bg: 3
@@ -38,61 +37,32 @@ URxvt.tabbed_new.tabsel-bg: 8
 URxvt.tabbed_new.tab-fg:    0
 URxvt.tabbed_new.tab-bg:    8
 
+urxvt.transparent: true
 
-URxvt.foreground:#eeeeee
-URxvt.background:#101010
-URxvt.transparent: true
-
-*background: rgb:1a/1a/1a
-*foreground: rgb:aa/aa/aa
+urxvt.background:        #202020
+urxvt.foreground:        #dedede
 
 !black
-*color0:     rgb:00/00/00
-*color8:     rgb:66/66/66
+urxvt*color0:            #202020
+urxvt*color8:            #666666
 !red
-*color1:     rgb:9e/18/28
-*color9:     rgb:bc/57/66
+urxvt*color1:            #dd5c5c
+urxvt*color9:            #ffa0a0
 !green
-*color2:     rgb:00/88/00
-*color10:    rgb:61/a1/71
-!brown/yellow
-*color3:     rgb:d2/bb/4b
-*color11:    rgb:e7/8b/52
+urxvt*color2:            #67ae12
+urxvt*color10:           #bde077
+!yellow
+urxvt*color3:            #bdb76b
+urxvt*color11:           #ffe863
 !blue
-*color4:     rgb:51/61/91
-*color12:    rgb:50/85/af
+urxvt*color4:            #2782a7
+urxvt*color12:           #87ceeb
 !magenta
-*color5:     rgb:96/3c/59
-*color13:    rgb:a9/7a/99
+urxvt*color5:            #a17ba1
+urxvt*color13:           #d793d7
 !cyan
-*color6:     rgb:41/81/79
-*color14:    rgb:6b/a4/a4
+urxvt*color6:            #5e9ca7
+urxvt*color14:           #8ce1f0
 !white
-*color7:     rgb:ee/ee/ee
-*color15:    rgb:30/30/30
-
-
-!black
-!*color0: rgb:25/25/25
-!*color8: rgb:70/70/70
-!red
-!*color1: rgb:cc/00/00
-!*color9: rgb:ff/ff/ff
-!green
-!*color2: rgb:4e/9a/06
-!*color10: rgb:4a/A2/10
-!brown/yellow
-!*color3: rgb:c4/a0/00
-!*color11: rgb:fc/e9/4f
-!blue
-!*color4: rgb:30/50/a4
-!*color12: rgb:72/9f/cf
-!magenta
-!*color5: rgb:75/50/7b
-!*color13: rgb:ad/7f/a8
-!cyan
-!*color6: rgb:06/98/9a
-!*color14: rgb:34/e2/e2
-!white
-!*color7: rgb:e5/78/08
-!*color15: rgb:50/50/50
+urxvt*color7:            #eeeeee
+urxvt*color15:           #ffffff
