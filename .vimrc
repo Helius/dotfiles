@@ -17,7 +17,7 @@ Bundle 'gmarik/vundle'
 " My Bundles here:
 "
 " original repos on github
- Bundle 'tpope/vim-fugitive'
+Bundle 'tpope/vim-fugitive'
 " Bundle 'Lokaltog/vim-easymotion'
 " Bundle 'rstacruz/sparkup', {'rtp': 'vim/'}
 " Bundle 'tpope/vim-rails.git'
