@@ -100,28 +100,28 @@ mytextclock = awful.widget.textclock({ align = "right" }, " %a %d %b, %H:%M:%S "
 ----------------------- Helius widgets -------------------------
 
 ---------- dropbox icon ---------
-db_icon = widget({ type = "imagebox" })
-db_icon.image = image(awful.util.getdir("config") .. "/icons/dropbox/3/x.png")
-db_icon:add_signal("mouse::enter", function ()
-					local fd = io.popen("dropbox status", "r")		-- get dropbox status (you need put cli script "dropbox.py" to /usr/local/bin/dropbox  )
-					if not fd then
-							do return "no info" end
-					end
-					local db_text = fd:read("*a")
-					io.close(fd)
-					naughty.notify ({
-							text = db_text,
-							--title = "dropbox",
-							position = "bottom_right",
-							timeout = 5,
-							icon = awful.util.getdir("config") .. "/icons/dropbox/dropbox.png", -- path to dropbox icon for popup (~/.config/awesom/db_icon for me)
-							fg="#a0aaaa",
-							bg="#202525",
-							font= "terminus 9",
-							--width = 300,
-							border_width = 0
-					})
-			 end)
+--db_icon = widget({ type = "imagebox" })
+--db_icon.image = image(awful.util.getdir("config") .. "/icons/dropbox/3/x.png")
+--db_icon:add_signal("mouse::enter", function ()
+--					local fd = io.popen("dropbox status", "r")		-- get dropbox status (you need put cli script "dropbox.py" to /usr/local/bin/dropbox  )
+--					if not fd then
+--							do return "no info" end
+--					end
+--					local db_text = fd:read("*a")
+--					io.close(fd)
+--					naughty.notify ({
+--							text = db_text,
+--							--title = "dropbox",
+--							position = "bottom_right",
+--							timeout = 5,
+--							icon = awful.util.getdir("config") .. "/icons/dropbox/dropbox.png", -- path to dropbox icon for popup (~/.config/awesom/db_icon for me)
+--							fg="#a0aaaa",
+--							bg="#202525",
+--							font= "terminus 9",
+--							--width = 300,
+--							border_width = 0
+--					})
+--			 end)
 
 
 -------- turn on/off message from syslog -------
@@ -500,6 +500,15 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end),
     awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
+    
+		-- notebook brightness
+		
+		awful.key({   }, "XF86MonBrightnessUp", function () 
+			awful.util.spawn("/home/eugene/.bin/backlight up", false)
+		end),
+    awful.key({   }, "XF86MonBrightnessDown", function ()
+			awful.util.spawn("/home/eugene/.bin/backlight down", false)
+		end),
 
     -- Prompt
     awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen]:run() end),
@@ -661,6 +670,8 @@ awful.rules.rules = {
     -- Set Firefox to always map on tags number 2 of screen 1.
     { rule = { class = "Firefox" },
       properties = { tag = tags[1][3] } },
+    { rule = { class = "studio" },
+      properties = { tag = tags[1][4] } },
 	{ rule = { class = "VirtualBox" },
 	  properties = { tag = tags[1][9] } },
 
@@ -699,45 +710,45 @@ end)
 		---------------- dropbox status icon -----------------
 
 -- timer hook handler, just look on dropbox status and if it change, set icon, end show pop up
-function db_timer_hook ()
-	
-    local fd = io.popen("dropbox status", "r")		-- get dropbox status (you need put cli script "dropbox.py" to /usr/local/bin/dropbox  )
-    if not fd then
-        do return "no info" end
-    end
-    local db_text = fd:read("*a")
-    io.close(fd)
-		-- check that status is chenged
-		if (db_text ~= old_db_text) then
-			if string.match(db_text, "Idle") then
-				db_icon.image = image(awful.util.getdir("config") .. "/icons/dropbox/3/idle.png") -- path to yor dropbox icon
-			else
-				if string.match(db_text, "rror") or string.match(db_text, "isn't") or (string.match(db_text, "Connecting...")) then 
-					db_icon.image = image(awful.util.getdir("config") .. "/icons/dropbox/3/x.png")
-				else 
-					db_icon.image = image(awful.util.getdir("config") .. "/icons/dropbox/3/busy.png")
-				end
--- 					naughty.notify ({
--- 							text = db_text,
--- 							title = "dropbox",
--- 							position = "bottom_right",
--- 							timeout = 2,
--- 							icon = awful.util.getdir("config") .. "/icon/db_icon/dropbox.png", -- path to dropbox icon for popup (~/.config/awesom/db_icon for me)
--- 							fg="#a0aaaa",
--- 							bg="#202525",
--- 							width = 300,
--- 							font = "terminus 9",
--- 							border_width = 0
--- 					})
-					old_db_text = db_text;
-			end	
-		end
-end
-
--- timer create
-db_timer = timer({ timeout = 2 })
-db_timer:add_signal("timeout", function() db_timer_hook () end)
-db_timer:start()
+--function db_timer_hook ()
+--	
+--    local fd = io.popen("dropbox status", "r")		-- get dropbox status (you need put cli script "dropbox.py" to /usr/local/bin/dropbox  )
+--    if not fd then
+--        do return "no info" end
+--    end
+--    local db_text = fd:read("*a")
+--    io.close(fd)
+--		-- check that status is chenged
+--		if (db_text ~= old_db_text) then
+--			if string.match(db_text, "Idle") then
+--				db_icon.image = image(awful.util.getdir("config") .. "/icons/dropbox/3/idle.png") -- path to yor dropbox icon
+--			else
+--				if string.match(db_text, "rror") or string.match(db_text, "isn't") or (string.match(db_text, "Connecting...")) then 
+--					db_icon.image = image(awful.util.getdir("config") .. "/icons/dropbox/3/x.png")
+--				else 
+--					db_icon.image = image(awful.util.getdir("config") .. "/icons/dropbox/3/busy.png")
+--				end
+---- 					naughty.notify ({
+---- 							text = db_text,
+---- 							title = "dropbox",
+---- 							position = "bottom_right",
+---- 							timeout = 2,
+---- 							icon = awful.util.getdir("config") .. "/icon/db_icon/dropbox.png", -- path to dropbox icon for popup (~/.config/awesom/db_icon for me)
+---- 							fg="#a0aaaa",
+---- 							bg="#202525",
+---- 							width = 300,
+---- 							font = "terminus 9",
+---- 							border_width = 0
+---- 					})
+--					old_db_text = db_text;
+--			end	
+--		end
+--end
+--
+---- timer create
+--db_timer = timer({ timeout = 2 })
+--db_timer:add_signal("timeout", function() db_timer_hook () end)
+--db_timer:start()
 
 
     --------------------- log viewer ---------------------
@@ -791,4 +802,5 @@ os.execute("nohup xcompmgr -cC &")
 -- start virtual mashine with XP
 -- os.execute("nohup VBoxManage startvm virtXP &")
 os.execute("finchdbus &")
+os.execute("dropbox&")
 os.execute("ubuntuone-launch&")
