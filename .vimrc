@@ -141,6 +141,7 @@ highlight Macro ctermfg=green
 "Invisible character colors 
 highlight NonText ctermfg=darkgray
 highlight SpecialKey ctermfg=darkgray
+highlight Visual ctermbg=LightBlue
 
 
 set wrap						"перенос длинных строк
