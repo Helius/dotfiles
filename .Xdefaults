@@ -66,3 +66,7 @@ urxvt*color14:           #8ce1f0
 !white
 urxvt*color7:            #eeeeee
 urxvt*color15:           #ffffff
+
+URxvt.colorBDMode:       on
+URxvt.colorBD:           darkcyan
+URxvt.colorUL:           #008AFF
