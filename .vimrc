@@ -141,6 +141,7 @@ highlight Macro ctermfg=green
 "Invisible character colors 
 highlight NonText ctermfg=darkgray
 highlight SpecialKey ctermfg=darkgray
+highlight Visual ctermbg=LightBlue
 
 
 set wrap						"перенос длинных строк
@@ -174,6 +175,7 @@ set showcmd					"показывать буфер вводимой команды
 set hlsearch				"при поиске помечать все найденные строки
 set incsearch				"при поиске перескакивать на найденный текст в процессе набора строки
 set ignorecase			"игнорировать прописные/строчные при поиске
+set smartcase       "если введена хоть одна буква в верхнем регистре, поиск становится регистрозависимым
 
 " ================== КОДИРОВКИ ФАЙЛОВ =================
 set ffs=unix,dos,mac										"формат файла по умолчанию (влияет на окончания строк) - будет перебираться в указанном порядке

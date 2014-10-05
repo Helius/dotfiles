@@ -95,6 +95,11 @@ mylauncher = awful.widget.launcher({ image = image(beautiful.awesome_icon),
 -- Create a textclock widget
 -- mytextclock = awful.widget.textclock({ align = "right" })
 mytextclock = awful.widget.textclock({ align = "right" }, " %a %d %b, %H:%M:%S ", 1)
+mytextclock:buttons(awful.util.table.join(awful.button({}, 1,
+	function()
+		awful.util.spawn("calendarwidget")
+	end)
+))
 
 
 ----------------------- Helius widgets -------------------------
@@ -728,24 +733,6 @@ end)
 --				else 
 --					db_icon.image = image(awful.util.getdir("config") .. "/icons/dropbox/3/busy.png")
 --				end
----- 					naughty.notify ({
----- 							text = db_text,
----- 							title = "dropbox",
----- 							position = "bottom_right",
----- 							timeout = 2,
----- 							icon = awful.util.getdir("config") .. "/icon/db_icon/dropbox.png", -- path to dropbox icon for popup (~/.config/awesom/db_icon for me)
----- 							fg="#a0aaaa",
----- 							bg="#202525",
----- 							width = 300,
----- 							font = "terminus 9",
----- 							border_width = 0
----- 					})
---					old_db_text = db_text;
---			end	
---		end
---end
---
----- timer create
 --db_timer = timer({ timeout = 2 })
 --db_timer:add_signal("timeout", function() db_timer_hook () end)
 --db_timer:start()
