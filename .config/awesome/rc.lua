@@ -15,7 +15,7 @@ require("debian.menu")
 beautiful.init(awful.util.getdir("config") .. "/themes/darkness/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "x-terminal-emulator"
+terminal = "urxvt"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -774,8 +774,8 @@ lv_timer:start()
 
 ------------------------- Helius end --------------------------------------
 
-client.add_signal("focus", function(c) c.border_color = beautiful.border_focus end)
-client.add_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
+--client.add_signal("focus", function(c) c.border_color = beautiful.border_focus end)
+--client.add_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
 -- exec some command on start awesome fo example setting keyboard
 os.execute("setxkbmap us,ru -option grp_led:caps,grp:caps_toggle &")
