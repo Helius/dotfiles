@@ -15,7 +15,7 @@ require("debian.menu")
 beautiful.init(awful.util.getdir("config") .. "/themes/darkness/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "x-terminal-emulator"
+terminal = "urxvt"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -508,6 +508,15 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end),
     awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
+    
+		-- notebook brightness
+		
+		awful.key({   }, "XF86MonBrightnessUp", function () 
+			awful.util.spawn("/home/eugene/.bin/backlight up", false)
+		end),
+    awful.key({   }, "XF86MonBrightnessDown", function ()
+			awful.util.spawn("/home/eugene/.bin/backlight down", false)
+		end),
 
     -- Prompt
     awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen]:run() end),
@@ -727,24 +736,6 @@ end)
 --				else 
 --					db_icon.image = image(awful.util.getdir("config") .. "/icons/dropbox/3/busy.png")
 --				end
--- 					naughty.notify ({
--- 							text = db_text,
--- 							title = "dropbox",
--- 							position = "bottom_right",
--- 							timeout = 2,
--- 							icon = awful.util.getdir("config") .. "/icon/db_icon/dropbox.png", -- path to dropbox icon for popup (~/.config/awesom/db_icon for me)
--- 							fg="#a0aaaa",
--- 							bg="#202525",
--- 							width = 300,
--- 							font = "terminus 9",
--- 							border_width = 0
----- 					})
---					old_db_text = db_text;
---			end	
---		end
---end
-
--- timer create
 --db_timer = timer({ timeout = 2 })
 --db_timer:add_signal("timeout", function() db_timer_hook () end)
 --db_timer:start()
@@ -786,8 +777,8 @@ lv_timer:start()
 
 ------------------------- Helius end --------------------------------------
 
-client.add_signal("focus", function(c) c.border_color = beautiful.border_focus end)
-client.add_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
+--client.add_signal("focus", function(c) c.border_color = beautiful.border_focus end)
+--client.add_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
 -- exec some command on start awesome fo example setting keyboard
 os.execute("setxkbmap us,ru -option grp_led:caps,grp:caps_toggle &")
@@ -802,4 +793,7 @@ os.execute("nohup xcompmgr -cC &")
 -- start virtual mashine with XP
 -- os.execute("nohup VBoxManage startvm virtXP &")
 os.execute("finchdbus &")
+os.execute("dropbox&")
 os.execute("ubuntuone-launch&")
+os.execute("setxkbmap -layout \"us,ru\"")
+os.execute("setxkbmap -option \"grp:caps_toggle,grp_led:scroll,compose:ralt\"")

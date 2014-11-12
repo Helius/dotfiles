@@ -149,4 +149,4 @@ fi
 # ignore case at completion cd dro -> cd Dropbox
 echo 'set completion-ignore-case on' > ~/.inputrc
 
-source ~/.exportrc
+source .local_exports
