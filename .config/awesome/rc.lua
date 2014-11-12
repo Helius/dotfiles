@@ -26,6 +26,8 @@ editor_cmd = terminal .. " -e " .. editor
 -- However, you can use another modifier like Mod1, but it may interact with others.
 modkey = "Mod4"
 
+require("pomodoro")
+
 -- ****************** user config function **********************
 -- read config file
 configf = io.open(awful.util.getdir("config") .. "/user.config")
@@ -445,6 +447,7 @@ for s = 1, screen.count() do
 				log_viewer,
 				tb_volume,
 				tw_battery,
+				pomodoro(),
         s == 1 and mysystray or nil,
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
