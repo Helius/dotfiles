@@ -133,11 +133,10 @@ else
 	NEST_CNT=""
 fi
 
-
 if [[ "${DISPLAY#$HOST}" != ":0.0" &&  "${DISPLAY}" != ":0" ]]; then
-	PS1='\[\e[7;32m\]$NEST_CNT\[\e[0;32m\]\[\e[7;31m\]\u\[\e[0;32m\]:\[\e[0m\]\[\e[0;34m\]\w \[\e[35m\][:`git branch | grep "*" | cut -c3-`] \[\e[0;31m\]$ \[\e[0m\] '
+	PS1='\[\e[7;32m\]$NEST_CNT\[\e[0;32m\]\[\e[7;31m\]\u\[\e[0;32m\]:\[\e[0m\]\[\e[0;34m\]\w \[\e[35m\][:`git branch 2>/dev/null | grep "*" | cut -c3-`] \[\e[0;31m\]$ \[\e[0m\] '
 else
-	PS1='\[\e[7;31m\]$NEST_CNT\[\e[0;32m\]\[\e[7;32m\]\u\[\e[0;32m\]:\[\e[0m\]\[\e[0;34m\]\w \[\e[35m\][:`git branch | grep "*" | cut -c3-`] \[\e[0;32m\]$ \[\e[0m\] '
+	PS1='\[\e[7;31m\]$NEST_CNT\[\e[0;32m\]\[\e[7;32m\]\u\[\e[0;32m\]:\[\e[0m\]\[\e[0;34m\]\w \[\e[35m\][:`git branch 2>/dev/null | grep "*" | cut -c3-`] \[\e[0;32m\]$ \[\e[0m\] '
 fi
 
 export EDITOR=/usr/bin/vim
