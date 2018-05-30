@@ -1,6 +1,6 @@
 [user]
 	name = Eugene Samoylov
-	email = eugene.samylov@eltex.loc
+	#email = eugene.samylov@eltex.loc
 [color]
 	diff = always
 [color "branch"]
