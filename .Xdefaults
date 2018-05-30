@@ -1,8 +1,8 @@
 URxvt.termName: rxvt
-URxvt.inheritPixmap: true
+URxvt.inheritPixmap: false
 URxvt.imLocale: ru_RU.UTF-8
 URxvt.urlLauncher: firefox
-URxvt.fading: 20%
+URxvt.fading: 80%
 URxvt.shading: 90
 !URxvt.blurRadius: 10
 
@@ -10,7 +10,7 @@ URxvt.perl-ext-common: selection,searchable-scrollback,readline,tabbed_new
 URxvt.saveLines: 99999
 URxvt.mouseWheelScrollPage: false
 
-URxvt.font: xft:terminus-10: pixelsize=12: autohint=true: antialias=true
+URxvt.font: xft:terminus-18: pixelsize=18: autohint=true: antialias=true
 
 URxvt.scrollstyle: plain
 URxvt.scrollBar_right: true
