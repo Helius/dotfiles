@@ -2,7 +2,7 @@ URxvt.termName: rxvt
 URxvt.inheritPixmap: false
 URxvt.imLocale: ru_RU.UTF-8
 URxvt.urlLauncher: firefox
-URxvt.fading: 80%
+URxvt.fading: 30%
 URxvt.shading: 90
 !URxvt.blurRadius: 10
 
