@@ -7,6 +7,7 @@
 " ================== VUNDLE CONFIG ==================
 set nocompatible               " be iMproved
 filetype off                   " required!
+filetype plugin indent on      " required!
 set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 "================= VUNDLE SECTION =============
@@ -23,15 +24,16 @@ Bundle 'tpope/vim-fugitive'
 " Bundle 'tpope/vim-rails.git'
 " vim-scripts repos
 Bundle 'https://github.com/bling/vim-airline.git'
+Bundle 'https://github.com/vim-airline/vim-airline-themes.git'
 Bundle 'L9'
-Bundle 'FuzzyFinder'
 Bundle 'https://github.com/Valloric/YouCompleteMe'
 " non github repos
 Bundle 'git://git.wincent.com/command-t.git'
+Bundle 'https://github.com/elzr/vim-json'
+" Bundle 'https://github.com/Ignotus/vim-cmake-project'
 " git repos on your local machine (ie. when working on your own plugin)
 " Bundle 'file:///Users/gmarik/path/to/plugin'
 " ...
-filetype plugin indent on     " required!
 "
 " Brief help
 " :BundleList          - list configured bundles
@@ -59,6 +61,21 @@ let g:airline_fugitive_prefix = '⎇ '
 let g:airline_paste_symbol = 'ρ'
 
 "============== AIRLINE END ==========================
+"
+augroup json_autocmd
+  autocmd!
+  autocmd FileType json set autoindent
+  autocmd FileType json set formatoptions=tcq2l
+  autocmd FileType json set textwidth=78 shiftwidth=4
+  autocmd FileType json set softtabstop=4 tabstop=4
+  autocmd FileType json set neexpandtab
+  autocmd FileType json set foldmethod=syntax
+  %retab!
+augroup END
+let g:vim_json_syntax_conceal = 0
+"============== Fuzzy search ctrlp =========
+set runtimepath^=~/.vim/bundle/ctrlp.vim
+"===========================================
 
 
 
@@ -149,15 +166,15 @@ set lbr							"переносить целые слова
 set number					"показывать номера строк ...
 set ruler						"показывать позицию курсора
 set numberwidth=5		" ... в 4 символа минимум
-set ts=2						"задать размер табуляции в четыре пробела
-set shiftwidth=2		"Размер табуляции по умолчанию
-set softtabstop=2
-set tabstop=2
+set ts=4						"задать размер табуляции в четыре пробела
+set shiftwidth=4		"Размер табуляции по умолчанию
+set softtabstop=4
+set tabstop=4
 set scrolljump=7	"Теперь нет необходимости передвигать курсор к краю экрана, чтобы подняться в режиме редактирования
 set scrolloff=7		"Теперь нет необходимости передвигать курсор к краю экрана, чтобы опуститься в режиме редактирования
 set winheight=12
 set winwidth=12
-set winminheight=12 "set from 12 to 0 according dread idea
+"set winminheight=12 "set from 12 to 0 according dread idea
 set winminwidth=7
 
 " установка режима сварачивания блоков тескста
@@ -256,7 +273,6 @@ set wildmenu
 set wcm=<Tab>
 menu insert.//*80*          i//*****************************************************************************
 menu insert.//-80-          i//-------------------------------------------------------
-menu insert.Helius					i//@@@@@@ Changed by Helius @@@@@@<ESC>
 menu insert.date-time       :r !date +"\%d.\%m.\%Y \%k:\%M"<CR>
 map <F5> :emenu insert.<TAB>
 
@@ -274,19 +290,6 @@ menu vim.session_save        :silent mksession! vim.session
 menu vim.session_load        :silent source vim.session<Tab>
 map <F11> :emenu vim.<TAB>
 
-" ------------------ Меню SVN -------------
-set wildmenu
-set wcm=<Tab>
-menu svn.vimdiff				:set background=dark<CR>:let df = expand('%')<CR>:vs svn-<c-r>=df<CR><CR>:read !svn cat <c-r>=df<CR><CR>:windo diffthis<CR>:set diffopt=filler,iwhite<CR>gg:set wrap<CR><C-W>w:set wrap<CR>
-menu svn.diff_this			:let df = expand('%')<CR>:new <CR>:set syntax=diff buftype=nofile<CR>:read !svn diff -x -b <c-r>=df <CR><CR>gg
-menu svn.commit_this		:!svn ci % --editor-cmd vim <CR><CR>:!<CR><CR>
-menu svn.status					:new<CR>:read !svn status<CR>:set buftype=nofile<CR>:/^[!ACDIMRX] .*<CR>
-menu svn.commit					:!svn ci --editor-cmd vim <CR><CR>:!<CR><CR>
-menu svn.update					:!svn up --editor-cmd vim <CR> 
-menu svn.log						:new<CR>:read !svn log <CR>:set buftype=nofile<CR>gg:/^r[0-9]*<CR>
-menu svn.diff						:new<CR>:read !svn diff -x -b<CR>:set syntax=diff buftype=nofile<CR>gg
-menu svn.browser				:!svnb<CR>
-map <F6> :emenu svn.<TAB>
 " ----------------- Menu make --------------
 set wildmenu
 set wcm=<Tab>
